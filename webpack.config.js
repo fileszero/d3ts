@@ -11,6 +11,7 @@ module.exports = {
         s5lineChart2: './client/scripts/LineChart2.ts',
         s6lineChart3: './client/scripts/LineChart3.ts',
         s7lineChart4: './client/scripts/LineChart4.ts',
+        s8lineChart5: './client/scripts/LineChart5.ts',
         client: './client/scripts/hello.ts'
     },
     output: {
