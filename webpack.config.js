@@ -6,10 +6,11 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        client: './client/scripts/hello.ts',
         s3: './client/scripts/s3.ts',
         s4lineChart: './client/scripts/LineChart.ts',
-        s5lineChart2: './client/scripts/LineChart2.ts'
+        s5lineChart2: './client/scripts/LineChart2.ts',
+        s6lineChart3: './client/scripts/LineChart3.ts',
+        client: './client/scripts/hello.ts'
     },
     output: {
         path: path.join(__dirname, "dist"),
