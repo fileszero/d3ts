@@ -7,7 +7,8 @@ const path = require('path');
 module.exports = {
     entry: {
         client: './client/scripts/hello.ts',
-        s3: './client/scripts/s3.ts'
+        s3: './client/scripts/s3.ts',
+        s4lineChart: './client/scripts/LineChart.ts'
     },
     output: {
         path: path.join(__dirname, "dist"),
