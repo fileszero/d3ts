@@ -8,7 +8,8 @@ module.exports = {
     entry: {
         client: './client/scripts/hello.ts',
         s3: './client/scripts/s3.ts',
-        s4lineChart: './client/scripts/LineChart.ts'
+        s4lineChart: './client/scripts/LineChart.ts',
+        s5lineChart2: './client/scripts/LineChart2.ts'
     },
     output: {
         path: path.join(__dirname, "dist"),
