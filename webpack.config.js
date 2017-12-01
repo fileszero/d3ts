@@ -13,6 +13,7 @@ module.exports = {
         s7lineChart4: './client/scripts/LineChart4.ts',
         s8lineChart5: './client/scripts/LineChart5.ts',
         s9lineChart6: './client/scripts/LineChart6.ts',
+        s10lineChart7: './client/scripts/LineChart7.ts',
         client: './client/scripts/hello.ts'
     },
     externals: {
