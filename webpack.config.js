@@ -12,7 +12,11 @@ module.exports = {
         s6lineChart3: './client/scripts/LineChart3.ts',
         s7lineChart4: './client/scripts/LineChart4.ts',
         s8lineChart5: './client/scripts/LineChart5.ts',
+        s9lineChart6: './client/scripts/LineChart6.ts',
         client: './client/scripts/hello.ts'
+    },
+    externals: {
+        'd3': 'd3'
     },
     output: {
         path: path.join(__dirname, "dist"),
