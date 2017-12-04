@@ -135,9 +135,72 @@ export namespace Charts {
         protected main: LineChart<Tx>;
         protected sub: LineChart<Tx>;
         constructor(container: Selection<BaseType, {}, HTMLElement, any>, chartMargin: Layout.Margin) {
-            const result = new Charts.LineChart<Date>(container, chartMargin);
-            const main = CreateChart(listData, svg, mainMargin);
-            const sub = CreateChart(listData, svg, subMargin);
+            const svgSize = Layout.getSize(container);
+            const mainMargin = { top: chartMargin.top, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom + 100 };
+            const subMargin = { top: svgSize.height - 100, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom };
+            const main = new Charts.LineChart<Tx>(container, mainMargin);
+            const sub = new Charts.LineChart<Tx>(container, subMargin);
+
+            /// サブチャートに範囲選択UIを追加
+            var brush = d3.brushX()
+                .extent([[0, 0], [sub.size.width, sub.size.height]])
+                .on("brush end", brushed);
+
+            const RangeSelecterUI = sub.chart.append("g")
+                .attr("class", "brush")
+                .call(<any>brush)
+                //.call(<any>brush.move, main.xScale.range());  //全範囲選択
+                ;
+
+
+            var zoom = d3.zoom()
+                .scaleExtent([1, Infinity])
+                .translateExtent([[0, 0], [main.size.width, main.size.height]])
+                .extent([[0, 0], [main.size.width, main.size.height]])
+                .on("zoom", zoomed);
+
+            const ZoomUI = container.append("rect")
+                .attr("class", "zoom")
+                .attr("width", main.size.width)
+                .attr("height", main.size.height)
+                .attr("transform", "translate(" + main.margin.left + "," + main.margin.top + ")")
+                .call(<any>zoom);
+            ;
+            function brushed() {
+                if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+                // console.log("brushed");
+                var s = d3.event.selection || sub.xScale.range();
+                const newXDomain = s.map(sub.xScale.invert, sub.xScale);
+                main.xScale.domain(newXDomain);
+                for (const series of main.series) {
+                    series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
+                }
+                main.xAxisArea.call(<any>main.xAxis);
+
+                ZoomUI.call(<any>zoom.transform, d3.zoomIdentity
+                    .scale(main.size.width / (s[1] - s[0]))
+                    .translate(-s[0], 0));
+            }
+
+            function zoomed() {
+                if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+                // console.log("zoomed");
+                var t = d3.event.transform;
+                main.xScale.domain(t.rescaleX(sub.xScale).domain());
+                for (const series of main.series) {
+                    series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
+                }
+                main.xAxisArea.call(<any>main.xAxis);
+                RangeSelecterUI.call(<any>brush.move, main.xScale.range().map(t.invertX, t));
+            }
+
+            this.main = main;
+            this.sub = sub;
+        }
+
+        public LoadData(data: LineSeriesData<Tx>[]) {
+            this.main.LoadData(data);
+            this.sub.LoadData(data);
         }
     }
 }
