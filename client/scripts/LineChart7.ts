@@ -23,6 +23,7 @@ namespace LineChart7 {
             rec.x = time;
             rec.y = y;
         }
+        listData.yAxis = Name;
         return listData;
     }
 
@@ -58,7 +59,7 @@ namespace LineChart7 {
         const listData: Charts.LineSeriesData<Date>[] = [];
         for (let i = 0; i < 3; i++) {
             listData.push(createData("Rec2nd" + i, new Date()));
-            listData.push(createData("Rec2nd" + 10 + i, df.addDays(new Date(), 1)));
+            listData.push(createData("Rec2nd" + i, df.addDays(new Date(), 1)));
         }
         chart.LoadData(listData);
     }, 3000);
@@ -66,7 +67,7 @@ namespace LineChart7 {
     setTimeout(() => {
         const listData: Charts.LineSeriesData<Date>[] = [];
         for (let i = 0; i < 5; i++) {
-            listData.push(createData("Rec3rd" + i, new Date()));
+            listData.push(createData("Rec2nd" + i, new Date()));
         }
         chart.LoadData(listData);
     }, 6000);
