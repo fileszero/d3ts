@@ -24,19 +24,20 @@ export namespace Charts {
         public plotArea: Selection<BaseType, {}, HTMLElement, any>;
         /** xの描画範囲 */
         public xScale: ScaleTime<number, number>;
-        /** yの描画範囲 */
-        public yScale: ScaleLinear<number, number>;
         /** */
-        public lineGenerator: Line<PlotData<Tx>>;
         public size: Layout.Size;
         public margin: Layout.Margin;
         public xAxis: d3.Axis<number | Date | { valueOf(): number; }>;
         public xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
-        public series: LineSeriesLine<Tx>[] = [];
+        public yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
+        public yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
+        protected colors: d3.ScaleOrdinal<string, string>;
 
         protected static ChartId = 0;
         constructor(container: Selection<BaseType, {}, HTMLElement, any>, chartMargin: Layout.Margin) {
             LineChart.ChartId++;
+            this.colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
+
             this.margin = new Layout.Margin(chartMargin);
             const svgSize = Layout.getSize(container);
             // Setting up Size
@@ -61,20 +62,21 @@ export namespace Charts {
 
             // Set the ranges 出力（描画）の範囲
             this.xScale = d3.scaleTime().range([0, this.size.width]);       // xの描画範囲
-            this.yScale = d3.scaleLinear().range([this.size.height, 0]);    // Yの描画範囲
 
-            // Define the line
-            this.lineGenerator = d3.line<PlotData<Tx>>()
-                .x((d) => { return this.xScale(d.x) })
-                .y((d) => { return this.yScale(d.y) });
 
             // Add the X Axis
             this.xAxis = d3.axisBottom(this.xScale);
             this.xAxisArea = this.chart.append("g")
                 .attr("class", "axis axis--x")
-                .attr("transform", "translate(0," + this.size.height + ")")
-                .call(<any>this.xAxis);
+                .attr("transform", "translate(0," + this.size.height + ")");
+            // .call(<any>this.xAxis);
 
+            this.yAxisAreaLeft = this.chart.append("g")
+                .attr("class", "axis axis--y--l");
+
+            this.yAxisAreaRight = this.chart.append("g")
+                .attr("class", "axis axis--y--r")
+                .attr("transform", "translate( " + this.size.width + ", 0 )")   //
         }
 
         /**
@@ -94,39 +96,96 @@ export namespace Charts {
             const max = d3.max(data, (line) => d3.max(line.data, (plot) => plot.y)) || 0;
             return [min, max];
         }
-        public LoadData(data: LineSeriesData<Tx>[]) {
-            var colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
+        public getLine(lineData: LineSeriesData<Tx>, idx: number): string {
+
+            const y_scale = d3.scaleLinear().range([this.size.height, 0]);    // Yの描画範囲
+            // Scale the range of the data 入力値の範囲
+            // 0 が真ん中に来るようにする
+            const y_ext = d3.max(lineData.data, (d) => Math.abs(d.y)) || 0;
+
+            y_scale.domain([-y_ext, y_ext]);
+            // Define the line
+            const generator = d3.line<PlotData<Tx>>()
+                .x((d, i) => { return this.xScale(d.x) })
+                .y((d, i) => { return y_scale(d.y) });
+
+            // Add the Y Axis
+            const yaxis_g = this.chart.append("g")
+                .attr("class", "axis")
+                .attr("stroke", this.colors(idx.toString()));
+            if (idx == 0) {
+                yaxis_g
+                    .call(<any>d3.axisLeft(y_scale));
+            } else {
+                const x_offset = this.size.width + ((idx - 1) * 20)
+                yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")   //
+                    .call(<any>d3.axisRight(y_scale));
+            }
+
+            return generator(lineData.data) || "";
+        }
+
+        protected DrawAxis(data: LineSeriesData<Tx>[]) {
             this.xScale.domain(this.xExtent(data)); // x入力値の範囲
+            this.xAxis = d3.axisBottom(this.xScale);
+            this.chart.select(".axis--x").call(<any>this.xAxis);
+        }
+        public LoadData(data: LineSeriesData<Tx>[]) {
+            this.DrawAxis(data);
 
             for (let i = 0; i < data.length; i++) {
 
                 // Scale the range of the data 入力値の範囲
                 // 0 が真ん中に来るようにする
-                const y_ext = this.yExtent(data)
-                this.yScale.domain([-y_ext[1], y_ext[1]]);
+                // const y_ext = this.yExtent(data)
+                // this.yScale.domain([-y_ext[1], y_ext[1]]);
 
-                const graph = this.plotArea.append("path")
-                    // .attr("class", "line")
-                    .attr("stroke", colors(i.toString()))
-                    .attr("d", <any>this.lineGenerator(data[i].data));
-
-                this.series.push(
-                    { data: data[i], canvas: graph }
-                );
+                // this.series.push(
+                //     { data: data[i], canvas: <Selection<BaseType, {}, HTMLElement, any>>graph }
+                // );
                 // Add the Y Axis
-                const yaxis_g = this.chart.append("g")
-                    .attr("class", "axis")
-                    .attr("stroke", colors(i.toString()));
-                if (i == 0) {
-                    yaxis_g
-                        .call(<any>d3.axisLeft(this.yScale));
-                } else {
-                    const x_offset = this.size.width + ((i - 1) * 20)
-                    yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")   //
-                        .call(<any>d3.axisRight(this.yScale));
-                }
+                // const yaxis_g = this.chart.append("g")
+                //     .attr("class", "axis")
+                //     .attr("stroke", colors(i.toString()));
+                // if (i == 0) {
+                //     yaxis_g
+                //         .call(<any>d3.axisLeft(this.yScale));
+                // } else {
+                //     const x_offset = this.size.width + ((i - 1) * 20)
+                //     yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")   //
+                //         .call(<any>d3.axisRight(this.yScale));
+                // }
             }
+            // https://stackoverflow.com/questions/34088550/d3-how-to-refresh-a-chart-with-new-data
+            // New data should be added to pie using enter()
+            // http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+            // http://tech.nitoyon.com/ja/blog/2013/10/24/d3js/
+            //rejoin data
+            const graph = this.plotArea.selectAll("path")
+                .data<LineSeriesData<Tx>>(data);
+            //remove unneeded path
+            graph.exit().remove();
+            graph.enter()
+                .append("path") //create any new path needed
+                .attr("class", "series")
+                .attr("stroke", (d, i) => {
+                    return this.colors(i.toString());
+                })
+                .attr("d", (d, i) => {
+                    return this.getLine(d, i);
+                });
+            graph
+                .transition().duration(500)
+                .attr("stroke", (d, i) => {
+                    return this.colors(i.toString());
+                })
+                .attr("d", (d, i) => {  // update path
+                    return this.getLine(d, i);
+                });
+
+            // and old data should be removed using exit().remove()
+            // graph.transition().delay(500).duration(1000)
 
         }
     }
@@ -141,6 +200,9 @@ export namespace Charts {
             const main = new Charts.LineChart<Tx>(container, mainMargin);
             const sub = new Charts.LineChart<Tx>(container, subMargin);
 
+            this.main = main;
+            this.sub = sub;
+            //return;
             /// サブチャートに範囲選択UIを追加
             var brush = d3.brushX()
                 .extent([[0, 0], [sub.size.width, sub.size.height]])
@@ -172,9 +234,11 @@ export namespace Charts {
                 var s = d3.event.selection || sub.xScale.range();
                 const newXDomain = s.map(sub.xScale.invert, sub.xScale);
                 main.xScale.domain(newXDomain);
-                for (const series of main.series) {
-                    series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
-                }
+                // for (const series of main.series) {
+                //     series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
+                // }
+                main.chart.selectAll(".series")
+                    .attr("d", (d, i) => main.getLine(<LineSeriesData<Tx>>d, i));
                 main.xAxisArea.call(<any>main.xAxis);
 
                 ZoomUI.call(<any>zoom.transform, d3.zoomIdentity
@@ -187,15 +251,13 @@ export namespace Charts {
                 // console.log("zoomed");
                 var t = d3.event.transform;
                 main.xScale.domain(t.rescaleX(sub.xScale).domain());
-                for (const series of main.series) {
-                    series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
-                }
+                main.chart.selectAll(".series")
+                    .attr("d", (d, i) => main.getLine(<LineSeriesData<Tx>>d, i));
+
                 main.xAxisArea.call(<any>main.xAxis);
                 RangeSelecterUI.call(<any>brush.move, main.xScale.range().map(t.invertX, t));
             }
 
-            this.main = main;
-            this.sub = sub;
         }
 
         public LoadData(data: LineSeriesData<Tx>[]) {
