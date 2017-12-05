@@ -115,19 +115,6 @@ export namespace Charts {
                 .x((d, i) => { return this.xScale(d.x) })
                 .y((d, i) => { return y_scale(d.y) });
 
-            // Add the Y Axis
-            // const yaxis_g = this.chart.append("g")
-            //     .attr("class", "axis")
-            //     .attr("stroke", this.colors(idx.toString()));
-            // if (idx == 0) {
-            //     yaxis_g
-            //         .call(<any>d3.axisLeft(y_scale));
-            // } else {
-            //     const x_offset = this.size.width + ((idx - 1) * 20)
-            //     yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")   //
-            //         .call(<any>d3.axisRight(y_scale));
-            // }
-
             return generator(lineData.data) || "";
         }
 
@@ -178,29 +165,6 @@ export namespace Charts {
             }
 
 
-            for (let i = 0; i < data.length; i++) {
-
-                // Scale the range of the data 入力値の範囲
-                // 0 が真ん中に来るようにする
-                // const y_ext = this.yExtent(data)
-                // this.yScale.domain([-y_ext[1], y_ext[1]]);
-
-                // this.series.push(
-                //     { data: data[i], canvas: <Selection<BaseType, {}, HTMLElement, any>>graph }
-                // );
-                // Add the Y Axis
-                // const yaxis_g = this.chart.append("g")
-                //     .attr("class", "axis")
-                //     .attr("stroke", colors(i.toString()));
-                // if (i == 0) {
-                //     yaxis_g
-                //         .call(<any>d3.axisLeft(this.yScale));
-                // } else {
-                //     const x_offset = this.size.width + ((i - 1) * 20)
-                //     yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")   //
-                //         .call(<any>d3.axisRight(this.yScale));
-                // }
-            }
             // https://stackoverflow.com/questions/34088550/d3-how-to-refresh-a-chart-with-new-data
             // New data should be added to pie using enter()
             // http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
