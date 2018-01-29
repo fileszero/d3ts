@@ -14,6 +14,7 @@ module.exports = {
         s8lineChart5: './client/scripts/LineChart5.ts',
         s9lineChart6: './client/scripts/LineChart6.ts',
         s10lineChart7: './client/scripts/LineChart7.ts',
+        s11csvread: './client/scripts/s11csvread.ts',
         client: './client/scripts/hello.ts'
     },
     externals: {
