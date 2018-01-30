@@ -4,7 +4,7 @@ import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { getSeconds } from "date-fns";
 
-import { Layout, Charts, File } from "../Models";
+import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart } from "../Models";
 
 import * as queryString from 'query-string';
 
@@ -17,14 +17,14 @@ namespace LineChart8 {
 
     const datePerser = d3.timeParse(urlParams.df || "%b-%Y");
 
-    async function readData(): Promise<Charts.LineSeriesData<Date>[]> {
-        const data: Charts.LineSeriesData<Date>[] = [];
+    async function readData(): Promise<LineSeriesData<Date>[]> {
+        const data: LineSeriesData<Date>[] = [];
         var filepath = urlParams.f || "./sp500mcol.csv";;
-        const csv = await File.csv(filepath);
+        const csv = await File.csvText(filepath);
 
         for (let field in csv[0]) {
             if (field != "date") {
-                const listData = new Charts.LineSeriesData<Date>();
+                const listData = new LineSeriesData<Date>();
                 listData.name = field;
                 //listData.yAxis = "default";
                 if (field == "price") {
@@ -41,7 +41,7 @@ namespace LineChart8 {
             const x = datePerser(row["date"] || "");
             if (!x) continue;
             for (const series of data) {
-                const rec = new Charts.PlotData<Date>();
+                const rec = new PlotData<Date>();
                 rec.x = x;
                 rec.y = parseFloat(row[series.name] || "0");
                 series.data.push(rec);
@@ -49,7 +49,7 @@ namespace LineChart8 {
         }
         return data;
     }
-    async function DrawChart(): Promise<Charts.ZoomableLineChart<Date>> {
+    async function DrawChart(): Promise<ZoomableLineChart<Date>> {
         const listData = await readData();
 
         const string_result = document.getElementById("string_result");
@@ -73,7 +73,7 @@ namespace LineChart8 {
         const yaxis_width = 20 * listData.length; //Y軸メモリ分確保
         const margin: Layout.Margin = { top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 };
 
-        const chart = new Charts.ZoomableLineChart<Date>(svg, margin);
+        const chart = new ZoomableLineChart<Date>(svg, margin);
         chart.LoadData(listData);
         return chart;
 

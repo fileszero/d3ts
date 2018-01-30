@@ -1,3 +1,6 @@
 export * from "./layout";
-export * from "./chart";
 export * from "./file";
+
+export * from "./data";
+export * from "./LineChart";
+export * from "./ZoomableLineChart";
