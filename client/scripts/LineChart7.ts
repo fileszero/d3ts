@@ -4,20 +4,20 @@ import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { getSeconds } from "date-fns";
 
-import { Layout, Charts } from "../Models";
+import { Layout, LineSeriesData, PlotData, ZoomableLineChart } from "../Models";
 
 namespace LineChart7 {
     d3.select("body").append("p")
         .text("Zoom and Brush in d3 https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172");
 
-    function createData(Name: string, date: Date): Charts.LineSeriesData<Date> {
+    function createData(Name: string, date: Date): LineSeriesData<Date> {
         // 時系列データ作成
         const today = df.startOfDay(date);
-        const listData = new Charts.LineSeriesData<Date>();
+        const listData = new LineSeriesData<Date>();
         listData.name = Name;
         let y = 0;
         for (let time = today; time.getDay() === today.getDay(); time = df.addMinutes(time, 1)) {
-            const rec = new Charts.PlotData<Date>();
+            const rec = new PlotData<Date>();
             listData.data.push(rec);
             y += (Math.random() - 0.5);
             rec.x = time;
@@ -27,8 +27,8 @@ namespace LineChart7 {
         return listData;
     }
 
-    function DrawChart(): Charts.ZoomableLineChart<Date> {
-        const listData: Charts.LineSeriesData<Date>[] = [];
+    function DrawChart(): ZoomableLineChart<Date> {
+        const listData: LineSeriesData<Date>[] = [];
         for (let i = 0; i < 3; i++) {
             let data = createData("Rec" + i, new Date());
             data.width = i + 1;
@@ -51,14 +51,14 @@ namespace LineChart7 {
         const yaxis_width = 20 * listData.length; //Y軸メモリ分確保
         const margin: Layout.Margin = { top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 };
 
-        const chart = new Charts.ZoomableLineChart<Date>(svg, margin);
+        const chart = new ZoomableLineChart<Date>(svg, margin);
         chart.LoadData(listData);
         return chart;
 
     }
     const chart = DrawChart();
     setTimeout(() => {
-        const listData: Charts.LineSeriesData<Date>[] = [];
+        const listData: LineSeriesData<Date>[] = [];
         for (let i = 0; i < 3; i++) {
             listData.push(createData("Rec2nd" + i, new Date()));
             listData.push(createData("Rec2nd" + i, df.addDays(new Date(), 1)));
@@ -67,7 +67,7 @@ namespace LineChart7 {
     }, 3000);
 
     setTimeout(() => {
-        const listData: Charts.LineSeriesData<Date>[] = [];
+        const listData: LineSeriesData<Date>[] = [];
         for (let i = 0; i < 5; i++) {
             listData.push(createData("Rec2nd" + i, new Date()));
         }

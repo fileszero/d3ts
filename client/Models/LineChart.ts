@@ -76,21 +76,8 @@ export class LineChart<Tx extends number | Date> {
         return [min, max];
     }
 
-    /**
-     * yの値範囲
-     */
-    protected yExtent(data: LineSeriesData<Tx>[]): number[] {
-        const min = d3.min(data, (line) => d3.min(line.data, (plot) => plot.y)) || 0;
-        const max = d3.max(data, (line) => d3.max(line.data, (plot) => plot.y)) || 0;
-        return [min, max];
-    }
-
     public getLine(lineData: LineSeriesData<Tx>, idx: number): string {
         let yaxis = this.yAxisDefs.filter((ax) => ax.name === lineData.yAxis)[0];
-        // Scale the range of the data 入力値の範囲
-        // 0 が真ん中に来るようにする
-        const y_ext = d3.max(lineData.data, (d) => Math.abs(d.y)) || 0;
-
         // Define the line
         const generator = d3.line<PlotData<Tx>>()
             .x((d, i) => { return this.xScale(d.x) })
