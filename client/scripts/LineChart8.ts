@@ -6,15 +6,21 @@ import { getSeconds } from "date-fns";
 
 import { Layout, Charts, File } from "../Models";
 
+import * as queryString from 'query-string';
+
 namespace LineChart8 {
     d3.select("body").append("p")
         .text("Zoom and Brush in d3 https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172");
 
-    const datePerser = d3.timeParse("%b-%Y");
+    const urlParams = queryString.parse(location.search);
+    console.log(urlParams);
+
+    const datePerser = d3.timeParse(urlParams.df || "%b-%Y");
 
     async function readData(): Promise<Charts.LineSeriesData<Date>[]> {
         const data: Charts.LineSeriesData<Date>[] = [];
-        const csv = await File.csv("./sp500mcol.csv");
+        var filepath = urlParams.f || "./sp500mcol.csv";;
+        const csv = await File.csv(filepath);
 
         for (let field in csv[0]) {
             if (field != "date") {
