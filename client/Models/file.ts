@@ -1,8 +1,10 @@
 import * as d3 from "d3";
 import { DSVParsedArray, DSVRowString, DSVRowAny } from "d3";
 
-export namespace File {
-    export async function csv(url: string): Promise<DSVParsedArray<DSVRowString>> {
+export class File {
+    constructor() { }
+
+    static async csv(url: string): Promise<DSVParsedArray<DSVRowString>> {
         return new Promise<DSVParsedArray<DSVRowString>>((resolve, reject) => {
             try {
                 d3.csv(url, (error: any, d: DSVParsedArray<DSVRowString>): void => {
@@ -14,7 +16,7 @@ export namespace File {
         });
     }
 
-    export async function csvParsed<ParsedRow extends DSVRowAny>(url: string, row: (rawRow: DSVRowString, index: number, columns: string[]) => ParsedRow): Promise<DSVParsedArray<ParsedRow>> {
+    static async csvParsed<ParsedRow extends DSVRowAny>(url: string, row: (rawRow: DSVRowString, index: number, columns: string[]) => ParsedRow): Promise<DSVParsedArray<ParsedRow>> {
         return new Promise<DSVParsedArray<ParsedRow>>((resolve, reject) => {
             try {
                 d3.csv(url, row, (error: any, d: DSVParsedArray<ParsedRow>): void => {
@@ -25,7 +27,7 @@ export namespace File {
             }
         });
     }
-    export async function csvText(url: string, option?: { header?: number, comment?: RegExp }): Promise<DSVParsedArray<DSVRowString>> {
+    static async csvText(url: string, option?: { header?: number, comment?: RegExp }): Promise<DSVParsedArray<DSVRowString>> {
         return new Promise<DSVParsedArray<DSVRowString>>((resolve, reject) => {
             try {
                 d3.text(url, (error: any, csv: string) => {
