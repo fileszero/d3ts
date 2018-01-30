@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        /* set the CSS */
+
+        body {
+            font: 12px Arial;
+        }
+
+        path {
+            /* stroke: steelblue;
+            stroke-width: 2; */
+            fill: none;
+        }
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: grey;
+            stroke-width: 1;
+            shape-rendering: crispEdges;
+        }
+
+        .area {
+            fill: steelblue;
+            clip-path: url(#clip);
+        }
+
+        .zoom {
+            cursor: move;
+            fill: none;
+            pointer-events: all;
+        }
+
+        .context {
+            border: solid 1px gold;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="./index.html">index</a>
+    <br/>
+
+    <h3>線２本 yN軸 色つき zoom ライブラリ化 CSV読み込み</h3>
+    <div id="chart"></div>
+    <h4>string result</h4>
+    <div id="string_result"></div>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="../dist/s12lineChart8.bundle.js"></script>
+</body>
+
+</html>

@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { Layout } from "./layout"
+import { YAxisDef } from "./AxisDef"
 
 export namespace Charts {
     export class PlotData<Tx extends number | Date>{
@@ -13,13 +14,6 @@ export namespace Charts {
         public name: string;
         public yAxis: string;
         public data: PlotData<Tx>[] = [];
-    }
-
-    class AxisDef {
-        public name: string;
-        public scale: ScaleLinear<number, number>;
-        public className: string;
-        public axis: d3.Axis<number | Date | { valueOf(): number; }>;
     }
 
     export class LineChart<Tx extends number | Date> {
@@ -34,7 +28,7 @@ export namespace Charts {
         public xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
         public yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
         public yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
-        protected yAxisDefs: AxisDef[] = [];
+        protected yAxisDefs: YAxisDef[] = [];
 
         protected colors: d3.ScaleOrdinal<string, string>;
 
@@ -103,17 +97,15 @@ export namespace Charts {
         }
 
         public getLine(lineData: LineSeriesData<Tx>, idx: number): string {
-
-            const y_scale = d3.scaleLinear().range([this.size.height, 0]);    // Yの描画範囲
+            let yaxis = this.yAxisDefs.filter((ax) => ax.name === lineData.yAxis)[0];
             // Scale the range of the data 入力値の範囲
             // 0 が真ん中に来るようにする
             const y_ext = d3.max(lineData.data, (d) => Math.abs(d.y)) || 0;
 
-            y_scale.domain([-y_ext, y_ext]);
             // Define the line
             const generator = d3.line<PlotData<Tx>>()
                 .x((d, i) => { return this.xScale(d.x) })
-                .y((d, i) => { return y_scale(d.y) });
+                .y((d, i) => { return yaxis.scale(d.y) });
 
             return generator(lineData.data) || "";
         }
@@ -123,42 +115,49 @@ export namespace Charts {
             this.xAxis = d3.axisBottom(this.xScale);
             this.chart.select(".axis--x").call(<any>this.xAxis);
         }
+
+        protected PutYAxis(yaxis: YAxisDef) {
+            yaxis.height = this.size.height;
+            yaxis.color = this.colors(yaxis.index.toString())
+            const yaxis_g = this.chart.append("g")
+                .attr("class", yaxis.className)
+                .attr("stroke", yaxis.color);
+            if (yaxis.index === 0) {
+                yaxis.axis = d3.axisLeft(yaxis.scale);
+            } else {
+                yaxis.axis = d3.axisRight(yaxis.scale);
+                const x_offset = this.size.width + ((yaxis.index - 1) * 20)
+                yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")
+            }
+            this.yAxisDefs.push(yaxis);
+        }
         public LoadData(data: LineSeriesData<Tx>[]) {
             this.DrawAxis(data);
 
-            const axis_keys = data.map((d) => d.yAxis).filter((k, i, arr) => arr.indexOf(k) === i);
-            for (const yaxis of this.yAxisDefs) {
+            const axis_keys = data.map((d) => d.yAxis).filter((k, i, arr) => arr.indexOf(k) === i); //y軸名一覧(distinct)
+            for (const yaxis of this.yAxisDefs) {   // 使われてないｙ軸を削除
                 if (axis_keys.indexOf(yaxis.name) >= 0) continue;
                 // 削除
                 this.chart.select("." + yaxis.className).remove();
             }
-            for (const axis_key of axis_keys) {
+            for (const axis_key of axis_keys) { // y軸再定義
                 let yaxis = this.yAxisDefs.filter((ax) => ax.name === axis_key)[0];
-                if (!yaxis) {
-                    yaxis = new AxisDef();
-                    yaxis.name = axis_key;
-                    yaxis.scale = d3.scaleLinear().range([this.size.height, 0]);    // Yの描画範囲
-                    yaxis.className = "yaxis--" + axis_key
+                if (!yaxis) {   //初回
                     const axis_idx = axis_keys.indexOf(axis_key)
-                    const yaxis_g = this.chart.append("g")
-                        .attr("class", yaxis.className)
-                        .attr("stroke", this.colors(axis_idx.toString()));
-
-                    if (axis_idx === 0) {
-                        yaxis.axis = d3.axisLeft(yaxis.scale);
-                    } else {
-                        yaxis.axis = d3.axisRight(yaxis.scale);
-                        const x_offset = this.size.width + ((axis_idx - 1) * 20)
-                        yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")
+                    yaxis = new YAxisDef(axis_key, axis_idx)
+                    //domain 評価
+                    const ydatas = data.filter((d) => d.yAxis === axis_key);
+                    for (const ydata of ydatas) {
+                        yaxis.domain(ydata.data.map((d) => d.y));
                     }
-                    this.yAxisDefs.push(yaxis);
+                    this.PutYAxis(yaxis);
                 }
 
                 const grp = data.filter((d) => d.yAxis === axis_key);
                 // Scale the range of the data 入力値の範囲
                 // 0 が真ん中に来るようにする
                 const y_ext = d3.max(grp, (ds) => d3.max(ds.data, (d) => Math.abs(d.y))) || 0;
-                yaxis.scale.domain([-y_ext, y_ext]);
+                // yaxis.scale.domain([-y_ext, y_ext]);
                 this.chart.select("." + yaxis.className)
                     .transition().duration(500)
                     .call(<any>yaxis.axis);
