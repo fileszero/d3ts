@@ -13,6 +13,8 @@ export namespace Charts {
     export class LineSeriesData<Tx extends number | Date> {
         public name: string;
         public yAxis: string;
+        public color: string;
+        public width: number = 1;
         public data: PlotData<Tx>[] = [];
     }
 
@@ -110,13 +112,13 @@ export namespace Charts {
             return generator(lineData.data) || "";
         }
 
-        protected DrawAxis(data: LineSeriesData<Tx>[]) {
+        protected DrawXAxis(data: LineSeriesData<Tx>[]) {
             this.xScale.domain(this.xExtent(data)); // x入力値の範囲
             this.xAxis = d3.axisBottom(this.xScale);
             this.chart.select(".axis--x").call(<any>this.xAxis);
         }
 
-        protected PutYAxis(yaxis: YAxisDef) {
+        protected DrawYAxis(yaxis: YAxisDef) {
             yaxis.height = this.size.height;
             yaxis.color = this.colors(yaxis.index.toString())
             const yaxis_g = this.chart.append("g")
@@ -129,67 +131,74 @@ export namespace Charts {
                 const x_offset = this.size.width + ((yaxis.index - 1) * 20)
                 yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")
             }
-            this.yAxisDefs.push(yaxis);
+            this.chart.select("." + yaxis.className)
+                .transition().duration(500)
+                .call(<any>yaxis.axis);
         }
         public LoadData(data: LineSeriesData<Tx>[]) {
-            this.DrawAxis(data);
+            this.DrawXAxis(data);
 
             const axis_keys = data.map((d) => d.yAxis).filter((k, i, arr) => arr.indexOf(k) === i); //y軸名一覧(distinct)
             for (const yaxis of this.yAxisDefs) {   // 使われてないｙ軸を削除
                 if (axis_keys.indexOf(yaxis.name) >= 0) continue;
                 // 削除
-                this.chart.select("." + yaxis.className).remove();
+                this.chart.selectAll("." + yaxis.className).remove();
             }
             for (const axis_key of axis_keys) { // y軸再定義
                 let yaxis = this.yAxisDefs.filter((ax) => ax.name === axis_key)[0];
                 if (!yaxis) {   //初回
                     const axis_idx = axis_keys.indexOf(axis_key)
                     yaxis = new YAxisDef(axis_key, axis_idx)
-                    //domain 評価
-                    const ydatas = data.filter((d) => d.yAxis === axis_key);
-                    for (const ydata of ydatas) {
-                        yaxis.domain(ydata.data.map((d) => d.y));
-                    }
-                    this.PutYAxis(yaxis);
+                    this.yAxisDefs.push(yaxis);
                 }
+                //domain 評価
+                const ydatas = data.filter((d) => d.yAxis === axis_key);
+                for (const ydata of ydatas) {
+                    yaxis.domain(ydata.data.map((d) => d.y));
+                }
+                this.DrawYAxis(yaxis);
 
-                const grp = data.filter((d) => d.yAxis === axis_key);
+                //const grp = data.filter((d) => d.yAxis === axis_key);
                 // Scale the range of the data 入力値の範囲
                 // 0 が真ん中に来るようにする
-                const y_ext = d3.max(grp, (ds) => d3.max(ds.data, (d) => Math.abs(d.y))) || 0;
+                //const y_ext = d3.max(grp, (ds) => d3.max(ds.data, (d) => Math.abs(d.y))) || 0;
                 // yaxis.scale.domain([-y_ext, y_ext]);
-                this.chart.select("." + yaxis.className)
-                    .transition().duration(500)
-                    .call(<any>yaxis.axis);
+
             }
 
 
+            // color
+            let i = 0;
+            for (const series of data) {
+                if (!series.color) {
+                    series.color = this.colors(i.toString());
+                }
+                i++;
+            }
             // https://stackoverflow.com/questions/34088550/d3-how-to-refresh-a-chart-with-new-data
             // New data should be added to pie using enter()
             // http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
             // http://tech.nitoyon.com/ja/blog/2013/10/24/d3js/
-            //rejoin data
-            const graph = this.plotArea.selectAll("path")
-                .data<LineSeriesData<Tx>>(data);
+            // https://shimz.me/blog/d3-js/2619 超基本！ コンソールでselect,data,enterメソッドを理解する。
+
+            //rejoin data データのバインドを開始
+            const graph = this.plotArea.selectAll("path").data<LineSeriesData<Tx>>(data);
             //remove unneeded path
             graph.exit().remove();
+
+            // データの数だけ、d3オブジェクトを作成
             graph.enter()
-                .append("path") //create any new path needed
-                .attr("class", "series")
-                .attr("stroke", (d, i) => {
-                    return this.colors(i.toString());
-                })
-                .attr("d", (d, i) => {
-                    return this.getLine(d, i);
-                });
+                .append("path") //create any new path needed // データをバインドし、要素を追加(この時点で初めてDOMにタグが挿入)
+                .attr("class", "series")   // バインドされたデータを使用して要素を操作
+                .attr("stroke", (d, i) => d.color)
+                .style("stroke-width", (d, i) => d.width) // 線の太さを決める
+                .attr("d", (d, i) => this.getLine(d, i))
+                ;
+
+            // redraw exist path
             graph
                 .transition().duration(500)
-                .attr("stroke", (d, i) => {
-                    return this.colors(i.toString());
-                })
-                .attr("d", (d, i) => {  // update path
-                    return this.getLine(d, i);
-                });
+                .attr("d", (d, i) => this.getLine(d, i));
 
             // and old data should be removed using exit().remove()
             // graph.transition().delay(500).duration(1000)

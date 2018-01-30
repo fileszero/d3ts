@@ -23,6 +23,7 @@ namespace LineChart8 {
                 //listData.yAxis = "default";
                 if (field == "price") {
                     listData.yAxis = "price";
+                    listData.width = 3;
                 } else {
                     listData.yAxis = "calc";
                 }

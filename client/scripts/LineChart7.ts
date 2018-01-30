@@ -30,7 +30,9 @@ namespace LineChart7 {
     function DrawChart(): Charts.ZoomableLineChart<Date> {
         const listData: Charts.LineSeriesData<Date>[] = [];
         for (let i = 0; i < 3; i++) {
-            listData.push(createData("Rec" + i, new Date()));
+            let data = createData("Rec" + i, new Date());
+            data.width = i + 1;
+            listData.push(data);
         }
         // http://bl.ocks.org/d3noob/e34791a32a54e015f57d
         // https://bl.ocks.org/d3noob/814a2bcb3e7d8d8db74f36f77c8e6b7f
