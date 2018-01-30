@@ -25,5 +25,28 @@ export namespace File {
             }
         });
     }
+    export async function csvText(url: string, option?: { header?: number, comment?: RegExp }): Promise<DSVParsedArray<DSVRowString>> {
+        return new Promise<DSVParsedArray<DSVRowString>>((resolve, reject) => {
+            try {
+                d3.text(url, (error: any, csv: string) => {
+                    if (error) reject(error);
+                    // remove comment rows with regex - not fully tested, but should work
+                    option = option || {};
+                    if (option.comment) {   // /^[#@][^\r\n]+[\r\n]+/mg
+                        csv = csv.replace(option.comment, '');
+                    }
+                    if (option.header) {
+                        const lines = csv.split('\n');
+                        lines.splice(0, option.header - 1);
+                        csv = lines.join('\n');
+                    }
+                    var data = d3.csvParse(csv);
+                    resolve(data);
+                });
+            } catch (ex) {
+                reject(ex);
+            }
+        });
+    }
 
 }
