@@ -119,12 +119,8 @@ abstract class AxisDef {
             this.drawArea.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }
 
-        if (animate > 0) {
-            this.drawArea.transition().duration(animate)
-                .call(<any>this.axis);
-        } else {
-            this.drawArea.call(<any>this.axis);
-        }
+        this.drawArea.transition().duration(animate)
+            .call(<any>this.axis);
     }
 
     remove(): void {
