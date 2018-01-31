@@ -10,7 +10,7 @@ export enum AxisPosition {
     Bottom,
     Left
 }
-abstract class AxisDef<Tx extends number | Date> {
+abstract class AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>) {
         this.parentArea = parentArea;
     }
@@ -22,7 +22,7 @@ abstract class AxisDef<Tx extends number | Date> {
 
     // 表示属性
     public className: string;
-    public axis: d3.Axis<Tx | { valueOf(): number; }>;
+    public axis: d3.Axis<number | Date | { valueOf(): number; }>;
     public color: string;
     public position: AxisPosition;
     public positionOffset: number = 0;
@@ -31,18 +31,47 @@ abstract class AxisDef<Tx extends number | Date> {
     public parentArea: Selection<BaseType, {}, HTMLElement, any>;
     public drawArea: Selection<BaseType, {}, HTMLElement, any>;
 
-    protected max: Tx;
-    protected min: Tx;
-    domain(values: Tx[]) {
+    protected max?: number | Date;
+    protected min?: number | Date;
+    domain(values: (number | Date)[], reset: boolean = false) {
+        if (reset) {
+            this.max = undefined;
+            this.min = undefined;
+        }
         const max = d3.max(values);
         if (max) {
-            if (max > this.max || !this.max) this.max = max;
+            if (!this.max || max > this.max) this.max = max;
         }
         const min = d3.min(values);
         if (min) {
-            if (min < this.min || !this.min) this.min = min;
+            if (!this.min || min < this.min) this.min = min;
         }
         this.updateScale();
+    }
+    range(): number[] {
+        return this.mScale.range();
+    }
+    protected mScale: ScaleTime<number, number> | ScaleLinear<number, number>;
+    getScale(): ScaleTime<number, number> | ScaleLinear<number, number> {
+        return this.mScale;
+    }
+    scale(val: number | Date): number {
+        if (typeof val === "number") {
+            return (<ScaleLinear<number, number>>this.mScale)(val);
+        }
+        if ((<Date>val).getDate) {
+            return (<ScaleTime<number, number>>this.mScale)(val);
+        }
+        return 0;
+    }
+
+    Zoom(range: number[]) {
+        if (!range) {
+            range = this.mScale.range();
+        }
+        const newXDomain = range.map((r) => this.mScale.invert(r));
+        this.domain(newXDomain);
+        return range;
     }
 
     protected mHeight: number = 0;
@@ -59,9 +88,12 @@ abstract class AxisDef<Tx extends number | Date> {
         this.updateScale();
     }
 
-
-    show(): void {
-        const axis_g = this.parentArea.append("g")
+    show(animate: number = 500): void {
+        if (!this.drawArea) {
+            this.drawArea = this.parentArea.append("g");
+        }
+        this.drawArea.exit().remove();
+        this.drawArea
             .attr("class", this.className)
             .attr("stroke", this.color);
         //.attr("transform", "translate(0," + this.parentArea.size..size.height + ")");
@@ -84,50 +116,53 @@ abstract class AxisDef<Tx extends number | Date> {
 
         this.axis = axisFunc(scale);
         if (x_offset != 0 || y_offset) {
-            axis_g.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
+            this.drawArea.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }
 
-        this.parentArea.select("." + this.className)
-            .transition().duration(500)
-            .call(<any>this.axis);
+        if (animate > 0) {
+            this.drawArea.transition().duration(animate)
+                .call(<any>this.axis);
+        } else {
+            this.drawArea.call(<any>this.axis);
+        }
     }
 
     remove(): void {
         this.parentArea.select("." + this.className).remove();
     }
 }
-export class YAxisDef extends AxisDef<number>{
+export class YAxisDef extends AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string) {
         super(parentArea);
         this.name = name;
         this.className = "yaxis--" + name
         this.position = AxisPosition.Left;
     }
-    public scale: ScaleLinear<number, number>;
+    // public scale: ScaleLinear<number, number>;
 
     updateScale() {
-        this.scale = d3.scaleLinear().range([this.height, this.width]);    // Yの描画範囲
-        if (this.scale) {
-            this.scale.domain([this.min, this.max]);
+        this.mScale = d3.scaleLinear().range([this.height, this.width]);    // Yの描画範囲
+        if (this.mScale && this.max && this.min) {
+            this.mScale.domain([this.min, this.max]);
         }
-        return this.scale;
+        return this.mScale;
     }
 }
 
-export class XAxisDef<Tx extends number | Date> extends AxisDef<Tx>{
+export class XAxisDef extends AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string) {
         super(parentArea);
         this.name = name;
         this.className = "xaxis--" + name
         this.position = AxisPosition.Bottom;
     }
-    public scale: ScaleTime<number, number>;
+    // public scale: ScaleTime<number, number>;
     updateScale() {
-        this.scale = d3.scaleTime().range([this.height, this.width]);    // Yの描画範囲
-        if (this.scale) {
-            this.scale.domain([this.min, this.max]);
+        this.mScale = d3.scaleTime().range([this.height, this.width]);    // Yの描画範囲
+        if (this.mScale && this.max && this.min) {
+            this.mScale.domain([this.min, this.max]);
         }
-        return this.scale;
+        return this.mScale;
     }
 
 }

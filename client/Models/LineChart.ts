@@ -13,7 +13,7 @@ export class LineChart<Tx extends number | Date> {
     /** */
     public size: Layout.Size;
     public margin: Layout.Margin;
-    public xAxis: XAxisDef<Tx>;
+    public xAxis: XAxisDef;
     public xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
     public yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
     public yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
@@ -145,23 +145,25 @@ export class LineChart<Tx extends number | Date> {
         const graph = this.plotArea.selectAll("path").data<LineSeriesData<Tx>>(data);
         //remove unneeded path
         graph.exit().remove();
-
         // データの数だけ、d3オブジェクトを作成
-        graph.enter()
+        const selection = graph.enter()
             .append("path") //create any new path needed // データをバインドし、要素を追加(この時点で初めてDOMにタグが挿入)
             .attr("class", "series")   // バインドされたデータを使用して要素を操作
             .attr("stroke", (d, i) => d.color)
             .style("stroke-width", (d, i) => d.width) // 線の太さを決める
-            .attr("d", (d, i) => this.getLine(d, i))
+            //.attr("d", (d, i) => this.getLine(d, i))
             ;
-
         // redraw exist path
-        graph
-            .transition().duration(500)
-            .attr("d", (d, i) => this.getLine(d, i));
-
+        this.redraw();
         // and old data should be removed using exit().remove()
         // graph.transition().delay(500).duration(1000)
 
+    }
+
+    redraw(animate: number = 500) {
+        const graph = this.plotArea.selectAll<BaseType, LineSeriesData<Tx>>("path");
+        graph
+            .transition().duration(animate)
+            .attr("d", (d, i) => this.getLine(d, i));
     }
 }

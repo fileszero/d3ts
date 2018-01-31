@@ -37,7 +37,7 @@ namespace LineChart8 {
             }
         }
         for (let row of csv) {
-            console.log(row);
+            //console.log(row);
             const x = datePerser(row["date"] || "");
             if (!x) continue;
             for (const series of data) {
