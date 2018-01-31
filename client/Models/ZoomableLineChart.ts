@@ -47,9 +47,9 @@ export class ZoomableLineChart<Tx extends number | Date> {
         function brushed() {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
             // console.log("brushed");
-            var s = d3.event.selection || sub.xScale.range();
-            const newXDomain = s.map(sub.xScale.invert, sub.xScale);
-            main.xScale.domain(newXDomain);
+            var s = d3.event.selection || sub.xAxis.scale.range();
+            const newXDomain = s.map(sub.xAxis.scale.invert, sub.xAxis.scale);
+            main.xAxis.scale.domain(newXDomain);
             // for (const series of main.series) {
             //     series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
             // }
@@ -66,12 +66,12 @@ export class ZoomableLineChart<Tx extends number | Date> {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
             // console.log("zoomed");
             var t = d3.event.transform;
-            main.xScale.domain(t.rescaleX(sub.xScale).domain());
+            main.xAxis.scale.domain(t.rescaleX(sub.xAxis.scale).domain());
             main.chart.selectAll(".series")
                 .attr("d", (d, i) => main.getLine(<LineSeriesData<Tx>>d, i));
 
             main.xAxisArea.call(<any>main.xAxis);
-            RangeSelecterUI.call(<any>brush.move, main.xScale.range().map(t.invertX, t));
+            RangeSelecterUI.call(<any>brush.move, main.xAxis.scale.range().map(t.invertX, t));
         }
 
     }

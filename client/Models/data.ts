@@ -9,4 +9,11 @@ export class LineSeriesData<Tx extends number | Date> {
     public color: string;
     public width: number = 1;
     public data: PlotData<Tx>[] = [];
+    get xArray(): Tx[] {
+        return this.data.map((d) => d.x);
+    }
+    get yArray(): number[] {
+        return this.data.map((d) => d.y);
+    }
+
 }

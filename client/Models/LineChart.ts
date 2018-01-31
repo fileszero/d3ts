@@ -2,18 +2,18 @@ import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { Layout } from "./layout"
-import { YAxisDef } from "./AxisDef"
+import { YAxisDef, XAxisDef, AxisPosition } from "./AxisDef"
 import { LineSeriesData, PlotData } from "./data";
 
 export class LineChart<Tx extends number | Date> {
     public chart: Selection<BaseType, {}, HTMLElement, any>;
     public plotArea: Selection<BaseType, {}, HTMLElement, any>;
     /** xの描画範囲 */
-    public xScale: ScaleTime<number, number>;
+    // public xScale: ScaleTime<number, number>;
     /** */
     public size: Layout.Size;
     public margin: Layout.Margin;
-    public xAxis: d3.Axis<number | Date | { valueOf(): number; }>;
+    public xAxis: XAxisDef<Tx>;
     public xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
     public yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
     public yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
@@ -49,15 +49,15 @@ export class LineChart<Tx extends number | Date> {
             .attr("height", this.size.height);
 
         // Set the ranges 出力（描画）の範囲
-        this.xScale = d3.scaleTime().range([0, this.size.width]);       // xの描画範囲
+        // this.xScale = d3.scaleTime().range([0, this.size.width]);       // xの描画範囲
 
 
         // Add the X Axis
-        this.xAxis = d3.axisBottom(this.xScale);
+        // this.xAxis = d3.axisBottom(this.xScale);
         this.xAxisArea = this.chart.append("g")
             .attr("class", "axis axis--x")
             .attr("transform", "translate(0," + this.size.height + ")");
-        // .call(<any>this.xAxis);
+        // // .call(<any>this.xAxis);
 
         this.yAxisAreaLeft = this.chart.append("g")
             .attr("class", "axis axis--y--l");
@@ -78,36 +78,29 @@ export class LineChart<Tx extends number | Date> {
 
     public getLine(lineData: LineSeriesData<Tx>, idx: number): string {
         let yaxis = this.yAxisDefs.filter((ax) => ax.name === lineData.yAxis)[0];
+        let xaxis = this.xAxis;
         // Define the line
         const generator = d3.line<PlotData<Tx>>()
-            .x((d, i) => { return this.xScale(d.x) })
+            .x((d, i) => { return xaxis.scale(d.x) })
             .y((d, i) => { return yaxis.scale(d.y) });
 
         return generator(lineData.data) || "";
     }
 
     protected DrawXAxis(data: LineSeriesData<Tx>[]) {
-        this.xScale.domain(this.xExtent(data)); // x入力値の範囲
-        this.xAxis = d3.axisBottom(this.xScale);
-        this.chart.select(".axis--x").call(<any>this.xAxis);
+        if (!this.xAxis) {
+            this.xAxis = new XAxisDef(this.xAxisArea, "default");
+            this.xAxis.width = this.size.width;
+        }
+        for (const line of data) {
+            this.xAxis.domain(line.xArray);
+        }
+        this.xAxis.show();
     }
 
     protected DrawYAxis(yaxis: YAxisDef) {
         yaxis.height = this.size.height;
-        yaxis.color = this.colors(yaxis.index.toString())
-        const yaxis_g = this.chart.append("g")
-            .attr("class", yaxis.className)
-            .attr("stroke", yaxis.color);
-        if (yaxis.index === 0) {
-            yaxis.axis = d3.axisLeft(yaxis.scale);
-        } else {
-            yaxis.axis = d3.axisRight(yaxis.scale);
-            const x_offset = this.size.width + ((yaxis.index - 1) * 20)
-            yaxis_g.attr("transform", "translate( " + x_offset + ", 0 )")
-        }
-        this.chart.select("." + yaxis.className)
-            .transition().duration(500)
-            .call(<any>yaxis.axis);
+        yaxis.show();
     }
     public LoadData(data: LineSeriesData<Tx>[]) {
         this.DrawXAxis(data);
@@ -116,27 +109,29 @@ export class LineChart<Tx extends number | Date> {
         for (const yaxis of this.yAxisDefs) {   // 使われてないｙ軸を削除
             if (axis_keys.indexOf(yaxis.name) >= 0) continue;
             // 削除
-            this.chart.selectAll("." + yaxis.className).remove();
+            yaxis.remove();
         }
         for (const axis_key of axis_keys) { // y軸再定義
             let yaxis = this.yAxisDefs.filter((ax) => ax.name === axis_key)[0];
             if (!yaxis) {   //初回
                 const axis_idx = axis_keys.indexOf(axis_key)
-                yaxis = new YAxisDef(axis_key, axis_idx)
+                if (axis_idx == 0) {
+                    yaxis = new YAxisDef(this.yAxisAreaLeft, axis_key)
+                } else {
+                    yaxis = new YAxisDef(this.yAxisAreaRight, axis_key)
+                    yaxis.position = AxisPosition.Right;
+                    yaxis.positionOffset = (axis_idx - 1) * 20;
+                }
+                yaxis.width = 20;
+                yaxis.color = this.colors(axis_idx.toString())
                 this.yAxisDefs.push(yaxis);
             }
             //domain 評価
             const ydatas = data.filter((d) => d.yAxis === axis_key);
             for (const ydata of ydatas) {
-                yaxis.domain(ydata.data.map((d) => d.y));
+                yaxis.domain(ydata.yArray);
             }
             this.DrawYAxis(yaxis);
-
-            //const grp = data.filter((d) => d.yAxis === axis_key);
-            // Scale the range of the data 入力値の範囲
-            // 0 が真ん中に来るようにする
-            //const y_ext = d3.max(grp, (ds) => d3.max(ds.data, (d) => Math.abs(d.y))) || 0;
-            // yaxis.scale.domain([-y_ext, y_ext]);
 
         }
 
