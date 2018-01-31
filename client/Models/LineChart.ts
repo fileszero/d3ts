@@ -6,18 +6,20 @@ import { YAxisDef, XAxisDef, AxisPosition } from "./AxisDef"
 import { LineSeriesData, PlotData } from "./data";
 
 export class LineChart<Tx extends number | Date> {
-    public chart: Selection<BaseType, {}, HTMLElement, any>;
-    public plotArea: Selection<BaseType, {}, HTMLElement, any>;
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */
     public size: Layout.Size;
     public margin: Layout.Margin;
     public xAxis: XAxisDef;
-    public xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
-    public yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
-    public yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
-    protected yAxisDefs: YAxisDef[] = [];
+
+    // 表示領域
+    public chart: Selection<BaseType, {}, HTMLElement, any>;
+    private plotArea: Selection<BaseType, {}, HTMLElement, any>;
+    private xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
+    private yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
+    private yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
+    private yAxisDefs: YAxisDef[] = [];
 
     protected colors: d3.ScaleOrdinal<string, string>;
 
