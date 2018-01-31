@@ -52,13 +52,12 @@ export class LineChart<Tx extends number | Date> {
         // this.xScale = d3.scaleTime().range([0, this.size.width]);       // xの描画範囲
 
 
-        // Add the X Axis
-        // this.xAxis = d3.axisBottom(this.xScale);
+        // Add the X Axis Area
         this.xAxisArea = this.chart.append("g")
             .attr("class", "axis axis--x")
             .attr("transform", "translate(0," + this.size.height + ")");
-        // // .call(<any>this.xAxis);
 
+        // Add the Y Axis Area (left & right)
         this.yAxisAreaLeft = this.chart.append("g")
             .attr("class", "axis axis--y--l");
 
@@ -67,14 +66,6 @@ export class LineChart<Tx extends number | Date> {
             .attr("transform", "translate( " + this.size.width + ", 0 )")   //
     }
 
-    /**
-     * xの値範囲
-     */
-    protected xExtent(data: LineSeriesData<Tx>[]): (Tx | 0)[] {
-        const min = d3.min(data, (line) => d3.min(line.data, (plot) => plot.x)) || 0;
-        const max = d3.max(data, (line) => d3.max(line.data, (plot) => plot.x)) || 0;
-        return [min, max];
-    }
 
     public getLine(lineData: LineSeriesData<Tx>, idx: number): string {
         let yaxis = this.yAxisDefs.filter((ax) => ax.name === lineData.yAxis)[0];
@@ -98,13 +89,7 @@ export class LineChart<Tx extends number | Date> {
         this.xAxis.show();
     }
 
-    protected DrawYAxis(yaxis: YAxisDef) {
-        yaxis.height = this.size.height;
-        yaxis.show();
-    }
-    public LoadData(data: LineSeriesData<Tx>[]) {
-        this.DrawXAxis(data);
-
+    protected DrawYAxis(data: LineSeriesData<Tx>[]) {
         const axis_keys = data.map((d) => d.yAxis).filter((k, i, arr) => arr.indexOf(k) === i); //y軸名一覧(distinct)
         for (const yaxis of this.yAxisDefs) {   // 使われてないｙ軸を削除
             if (axis_keys.indexOf(yaxis.name) >= 0) continue;
@@ -123,6 +108,7 @@ export class LineChart<Tx extends number | Date> {
                     yaxis.positionOffset = (axis_idx - 1) * 20;
                 }
                 yaxis.width = 20;
+                yaxis.height = this.size.height;
                 yaxis.color = this.colors(axis_idx.toString())
                 this.yAxisDefs.push(yaxis);
             }
@@ -131,9 +117,14 @@ export class LineChart<Tx extends number | Date> {
             for (const ydata of ydatas) {
                 yaxis.domain(ydata.yArray);
             }
-            this.DrawYAxis(yaxis);
+            yaxis.show();
 
         }
+    }
+    public LoadData(data: LineSeriesData<Tx>[]) {
+        this.DrawXAxis(data);
+        this.DrawYAxis(data);
+
 
 
         // color
