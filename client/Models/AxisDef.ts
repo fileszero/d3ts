@@ -18,7 +18,19 @@ abstract class AxisDef {
     public name: string;
 
     //
-    abstract updateScale(): AxisScale<number | Date | { valueOf(): number; }>;
+    updateScale(): AxisScale<number | Date | { valueOf(): number; }> {
+        if (this.max && this.min) {
+            if (this.isDate(this.max)) {
+                this.mScale = d3.scaleTime().range([this.height, this.width]);    // Yの描画範囲
+                this.mScale.domain([this.min, this.max]);
+            }
+            if (this.isNumber(this.max)) {
+                this.mScale = d3.scaleLinear().range([this.height, this.width]);    // Yの描画範囲
+                this.mScale.domain([this.min, this.max]);
+            }
+        }
+        return this.mScale;
+    }
 
     // 表示属性
     public className: string;
@@ -56,10 +68,10 @@ abstract class AxisDef {
         return this.mScale;
     }
     scale(val: number | Date): number {
-        if (typeof val === "number") {
+        if (this.isNumber(val)) {
             return (<ScaleLinear<number, number>>this.mScale)(val);
         }
-        if ((<Date>val).getDate) {
+        if (this.isDate(val)) {
             return (<ScaleTime<number, number>>this.mScale)(val);
         }
         return 0;
@@ -115,7 +127,7 @@ abstract class AxisDef {
         }
 
         this.axis = axisFunc(scale);
-        if (x_offset != 0 || y_offset) {
+        if (x_offset != 0 || y_offset != 0) {
             this.drawArea.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }
 
@@ -126,6 +138,13 @@ abstract class AxisDef {
     remove(): void {
         this.parentArea.select("." + this.className).remove();
     }
+    protected isDate(val: Date | any): val is Date {
+        return (<Date>val).getDate !== undefined;
+    }
+    protected isNumber(val: number | any): val is number {
+        return (<number>val).toPrecision !== undefined;
+    }
+
 }
 export class YAxisDef extends AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string) {
@@ -133,15 +152,6 @@ export class YAxisDef extends AxisDef {
         this.name = name;
         this.className = "yaxis--" + name
         this.position = AxisPosition.Left;
-    }
-    // public scale: ScaleLinear<number, number>;
-
-    updateScale() {
-        this.mScale = d3.scaleLinear().range([this.height, this.width]);    // Yの描画範囲
-        if (this.mScale && this.max && this.min) {
-            this.mScale.domain([this.min, this.max]);
-        }
-        return this.mScale;
     }
 }
 
@@ -151,14 +161,6 @@ export class XAxisDef extends AxisDef {
         this.name = name;
         this.className = "xaxis--" + name
         this.position = AxisPosition.Bottom;
-    }
-    // public scale: ScaleTime<number, number>;
-    updateScale() {
-        this.mScale = d3.scaleTime().range([this.height, this.width]);    // Yの描画範囲
-        if (this.mScale && this.max && this.min) {
-            this.mScale.domain([this.min, this.max]);
-        }
-        return this.mScale;
     }
 
 }

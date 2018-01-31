@@ -37,11 +37,10 @@ export class ZoomableLineChart<Tx extends number | Date> {
             .extent([[0, 0], [main.size.width, main.size.height]])
             .on("zoom", zoomed);
 
-        const ZoomUI = container.append("rect")
+        const ZoomUI = main.chart.append("rect")
             .attr("class", "zoom")
             .attr("width", main.size.width)
             .attr("height", main.size.height)
-            .attr("transform", "translate(" + main.margin.left + "," + main.margin.top + ")")
             .call(<any>zoom);
         ;
         function brushed() {

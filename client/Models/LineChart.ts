@@ -50,10 +50,6 @@ export class LineChart<Tx extends number | Date> {
             .attr("width", this.size.width)
             .attr("height", this.size.height);
 
-        // Set the ranges 出力（描画）の範囲
-        // this.xScale = d3.scaleTime().range([0, this.size.width]);       // xの描画範囲
-
-
         // Add the X Axis Area
         this.xAxisArea = this.chart.append("g")
             .attr("class", "axis axis--x")
