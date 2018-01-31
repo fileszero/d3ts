@@ -46,20 +46,7 @@ export class ZoomableLineChart<Tx extends number | Date> {
         ;
         function brushed() {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-            // console.log("brushed");
             var selected_range = main.xAxis.Zoom(d3.event.selection);
-            // var selected_range: number[] = d3.event.selection || sub.xAxis.scale.range();
-            // const newXDomain = selected_range.map(sub.xAxis.scale.invert, sub.xAxis.scale);
-            // main.xAxis.scale.domain(newXDomain);
-
-            // for (const series of main.series) {
-            //     series.canvas.attr("d", <any>main.lineGenerator(series.data.data));
-            // }
-            // main.chart.selectAll(".series")
-            //     .attr("d", (d, i) => main.getLine(<LineSeriesData<Tx>>d, i));
-            main.xAxis.show(100);
-            //main.xAxisArea.call(<any>main.xAxis);
-
             ZoomUI.call(<any>zoom.transform,
                 d3.zoomIdentity
                     .scale(main.size.width / (selected_range[1] - selected_range[0]))
@@ -72,10 +59,6 @@ export class ZoomableLineChart<Tx extends number | Date> {
             // console.log("zoomed");
             var t = d3.event.transform;
             main.xAxis.domain(t.rescaleX(sub.xAxis.getScale()).domain(), true);
-            // main.chart.selectAll(".series")
-            //     .attr("d", (d, i) => main.getLine(<LineSeriesData<Tx>>d, i));
-
-            main.xAxis.show(100);
             main.redraw(100);
             RangeSelecterUI.call(<any>brush.move, main.xAxis.range().map(t.invertX, t));
         }

@@ -78,7 +78,7 @@ export class LineChart<Tx extends number | Date> {
         return generator(lineData.data) || "";
     }
 
-    protected DrawXAxis(data: LineSeriesData<Tx>[]) {
+    protected LoadXAxis(data: LineSeriesData<Tx>[]) {
         if (!this.xAxis) {
             this.xAxis = new XAxisDef(this.xAxisArea, "default");
             this.xAxis.width = this.size.width;
@@ -86,10 +86,9 @@ export class LineChart<Tx extends number | Date> {
         for (const line of data) {
             this.xAxis.domain(line.xArray);
         }
-        this.xAxis.show();
     }
 
-    protected DrawYAxis(data: LineSeriesData<Tx>[]) {
+    protected LoadYAxis(data: LineSeriesData<Tx>[]) {
         const axis_keys = data.map((d) => d.yAxis).filter((k, i, arr) => arr.indexOf(k) === i); //y軸名一覧(distinct)
         for (const yaxis of this.yAxisDefs) {   // 使われてないｙ軸を削除
             if (axis_keys.indexOf(yaxis.name) >= 0) continue;
@@ -117,13 +116,11 @@ export class LineChart<Tx extends number | Date> {
             for (const ydata of ydatas) {
                 yaxis.domain(ydata.yArray);
             }
-            yaxis.show();
-
         }
     }
     public LoadData(data: LineSeriesData<Tx>[]) {
-        this.DrawXAxis(data);
-        this.DrawYAxis(data);
+        this.LoadXAxis(data);
+        this.LoadYAxis(data);
 
 
 
@@ -161,6 +158,11 @@ export class LineChart<Tx extends number | Date> {
     }
 
     redraw(animate: number = 500) {
+        this.xAxis.show(animate);
+        for (const yaxis of this.yAxisDefs) {   // 描画
+            yaxis.show(animate);
+        }
+
         const graph = this.plotArea.selectAll<BaseType, LineSeriesData<Tx>>("path");
         graph
             .transition().duration(animate)
