@@ -4,7 +4,7 @@
   "description": "draw chart with d3",
   "scripts": {
     "webpack": "webpack",
-    "webpack-w": "webpack --watch",
+    "webpack-w": "webpack --watch --config ./samples/webpack.config.js",
     "electron": "electron ./main.js"
   },
   "author": "files zero",

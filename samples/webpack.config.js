@@ -6,17 +6,17 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        s3: './client/scripts/s3.ts',
-        s4lineChart: './client/scripts/LineChart.ts',
-        s5lineChart2: './client/scripts/LineChart2.ts',
-        s6lineChart3: './client/scripts/LineChart3.ts',
-        s7lineChart4: './client/scripts/LineChart4.ts',
-        s8lineChart5: './client/scripts/LineChart5.ts',
-        s9lineChart6: './client/scripts/LineChart6.ts',
-        s10lineChart7: './client/scripts/LineChart7.ts',
-        s11csvread: './client/scripts/s11csvread.ts',
-        s12lineChart8: './client/scripts/LineChart8.ts',
-        client: './client/scripts/hello.ts'
+        s3: path.join(__dirname, 'scripts/s3.ts'),
+        s4lineChart: path.join(__dirname, 'scripts/LineChart.ts'),
+        s5lineChart2: path.join(__dirname, 'scripts/LineChart2.ts'),
+        s6lineChart3: path.join(__dirname, 'scripts/LineChart3.ts'),
+        s7lineChart4: path.join(__dirname, 'scripts/LineChart4.ts'),
+        s8lineChart5: path.join(__dirname, 'scripts/LineChart5.ts'),
+        s9lineChart6: path.join(__dirname, 'scripts/LineChart6.ts'),
+        s10lineChart7: path.join(__dirname, 'scripts/LineChart7.ts'),
+        s11csvread: path.join(__dirname, 'scripts/s11csvread.ts'),
+        s12lineChart8: path.join(__dirname, 'scripts/LineChart8.ts'),
+        client: path.join(__dirname, 'scripts/hello.ts'),
     },
     externals: {
         'd3': 'd3'
