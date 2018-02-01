@@ -8,7 +8,7 @@
   },
   "author": "files zero",
   "main": "dist/index.js",
-  "types": "src/index.ts",
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@types/date-fns": "^2.6.0",
     "@types/query-string": "^5.0.1",
