@@ -1,14 +1,13 @@
 {
   "name": "d3ts",
   "version": "1.0.0",
-  "description": "",
+  "description": "draw chart with d3",
   "scripts": {
     "webpack": "webpack",
     "webpack-w": "webpack --watch",
     "electron": "electron ./main.js"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "files zero",
   "devDependencies": {
     "@types/d3": "^4.12.0",
     "@types/date-fns": "^2.6.0",
