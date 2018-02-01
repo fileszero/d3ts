@@ -5,7 +5,7 @@
     "tasks": [
         {
             "type": "npm",
-            "script": "webpack-w",
+            "script": "sample-w",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

@@ -35,7 +35,7 @@ module.exports = {
         loaders: [
             {
                 test: /\.tsx?$/,
-                loader: 'awesome-typescript-loader'
+                loader: 'awesome-typescript-loader?configFileName=' + path.join(__dirname, 'tsconfig.json')
             }
         ]
     },

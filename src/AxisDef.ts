@@ -9,7 +9,7 @@ export enum AxisPosition {
     Bottom,
     Left
 }
-abstract class AxisDef {
+export abstract class AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string, className: string, position: AxisPosition) {
         this.name = name;
         this.className = className;
