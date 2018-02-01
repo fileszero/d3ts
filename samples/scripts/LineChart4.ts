@@ -1,25 +1,25 @@
 import * as d3 from "d3";
 import * as df from "date-fns";
-import { ScaleLinear, Line, Simulation, color } from "d3";
+import { ScaleLinear, Line, Simulation } from "d3";
 
 namespace LineChart {
     d3.select("body").append("p")
         .text("Sample 3 Line Chart https://dev.classmethod.jp/client-side/javascript/d3-js_linechart_and_barchart/");
 
     class Rec {
-        public Name: string;
-        public time: Date;
-        public value: number;
+        public Name: string = "";
+        public time: Date = new Date();
+        public value: number = 0;
     }
     class Size {
-        public width: number;
-        public height: number;
+        public width: number = 0;
+        public height: number = 0;
     }
     class Margin {
-        public top: number;
-        public right: number;
-        public bottom: number;
-        public left: number;
+        public top: number = 0;
+        public right: number = 0;
+        public bottom: number = 0;
+        public left: number = 0;
     }
     function getContentsSize(container: Size, margin: Margin): Size {
         const result: Size = {
@@ -46,7 +46,7 @@ namespace LineChart {
     }
     function DrawChart(): void {
         const listData: Rec[][] = [];
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 10; i++) {
             listData.push(createData("Rec" + i));
         }
         // http://bl.ocks.org/d3noob/e34791a32a54e015f57d
@@ -59,7 +59,7 @@ namespace LineChart {
         const chartSize = getContentsSize(svgSize, svgMargin);
 
         var parseDate = d3.timeParse("%d-%b-%y"); // https://github.com/d3/d3/blob/master/CHANGES.md#time-formats-d3-time-format
-        var colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
+
         // Adds the svg canvas
         const svg = d3.select("body")
             .append("svg")
@@ -94,14 +94,12 @@ namespace LineChart {
             y.domain([-max, max]);
 
             chart.append("path")
-                // .attr("class", "line")
-                .attr("stroke", colors(i.toString()))
+                .attr("class", "line")
                 .attr("d", <any>line(listData[i]));
 
             // Add the Y Axis
             const yaxis_g = chart.append("g")
-                .attr("class", "axis")
-                .attr("stroke", colors(i.toString()));
+                .attr("class", "axis");
             if (i == 0) {
                 yaxis_g
                     .call(<any>d3.axisLeft(y));

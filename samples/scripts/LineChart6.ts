@@ -9,25 +9,27 @@ namespace LineChart6 {
         .text("Zoom and Brush in d3 https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172");
 
     class Rec {
-        public Name: string;
-        public time: Date;
-        public value: number;
+        public Name: string = "";
+        public time: Date = new Date();
+        public value: number = 0;
     }
     class Size {
-        public width: number;
-        public height: number;
+        public width: number = 0;
+        public height: number = 0;
     }
     class Margin {
-        constructor(src: Margin) {
-            this.top = src.top;
-            this.right = src.right;
-            this.bottom = src.bottom;
-            this.left = src.left;
+        constructor(src?: Margin) {
+            if (src) {
+                this.top = src.top;
+                this.right = src.right;
+                this.bottom = src.bottom;
+                this.left = src.left;
+            }
         }
-        public top: number;
-        public right: number;
-        public bottom: number;
-        public left: number;
+        public top: number = 0;
+        public right: number = 0;
+        public bottom: number = 0;
+        public left: number = 0;
     }
     function getContentsSize(container: Size, margin: Margin): Size {
         const result: Size = {
@@ -57,18 +59,18 @@ namespace LineChart6 {
         return listData;
     }
     class LineSeries {
-        public canvas: Selection<BaseType, {}, HTMLElement, any>;
-        public generator: Line<Rec>;
-        public data: Rec[];
+        public canvas: Selection<BaseType, {}, HTMLElement, any> | undefined;
+        public generator: Line<Rec> | undefined;
+        public data: Rec[] = [];
     }
     class Chart {
-        public chart: Selection<BaseType, {}, HTMLElement, any>;
-        public plotArea: Selection<BaseType, {}, HTMLElement, any>;
-        public xScale: ScaleTime<number, number>;
-        public size: Size;
-        public margin: Margin;
-        public xAxis: d3.Axis<number | Date | { valueOf(): number; }>;
-        public xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
+        public chart: Selection<BaseType, {}, HTMLElement, any> = d3.select("body");
+        public plotArea: Selection<BaseType, {}, HTMLElement, any> | undefined;
+        public xScale: ScaleTime<number, number> = d3.scaleTime().range([0, 0]);
+        public size: Size = new Size();
+        public margin: Margin = new Margin();
+        public xAxis: d3.Axis<number | Date | { valueOf(): number; }> | undefined;
+        public xAxisArea: Selection<BaseType, {}, HTMLElement, any> | undefined;
         public series: LineSeries[] = [];
     }
     let ChartId: number = 0;
@@ -180,7 +182,6 @@ namespace LineChart6 {
             //.call(<any>brush.move, main.xScale.range());  //全範囲選択
             ;
 
-
         var zoom = d3.zoom()
             .scaleExtent([1, Infinity])
             .translateExtent([[0, 0], [main.size.width, main.size.height]])
@@ -195,13 +196,16 @@ namespace LineChart6 {
             .call(<any>zoom);
         ;
         function brushed() {
+            if (!main.xAxisArea) return;    // initialized?
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
             // console.log("brushed");
             var s = d3.event.selection || sub.xScale.range();
             const newXDomain = s.map(sub.xScale.invert, sub.xScale);
             main.xScale.domain(newXDomain);
             for (const series of main.series) {
-                series.canvas.attr("d", <any>series.generator(series.data));
+                if (series.canvas && series.generator) {
+                    series.canvas.attr("d", <any>series.generator(series.data));
+                }
             }
             main.xAxisArea.call(<any>main.xAxis);
 
@@ -211,12 +215,15 @@ namespace LineChart6 {
         }
 
         function zoomed() {
+            if (!main.xAxisArea) return;    // initialized?
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
             // console.log("zoomed");
             var t = d3.event.transform;
             main.xScale.domain(t.rescaleX(sub.xScale).domain());
             for (const series of main.series) {
-                series.canvas.attr("d", <any>series.generator(series.data));
+                if (series.canvas && series.generator) {
+                    series.canvas.attr("d", <any>series.generator(series.data));
+                }
             }
             main.xAxisArea.call(<any>main.xAxis);
             RangeSelecterUI.call(<any>brush.move, main.xScale.range().map(t.invertX, t));

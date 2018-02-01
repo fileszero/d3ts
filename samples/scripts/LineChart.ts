@@ -6,11 +6,11 @@ namespace LineChart {
         .text("Sample 3 Line Chart https://dev.classmethod.jp/client-side/javascript/d3-js_linechart_and_barchart/");
 
     class Rec {
-        public Name: string;
-        public time: Date;
-        public value: number;
+        public Name: string = "";
+        public time: Date = new Date();
+        public value: number = 0;
     }
-    function createData(Name: string): Rec[] {
+    function DrawChart(): void {
         // 時系列データ作成
         const today = df.startOfDay(new Date());
         const listData: Rec[] = [];
@@ -23,13 +23,8 @@ namespace LineChart {
             seed += (Math.random() - 0.5);
             rec.value = seed;
         }
-        return listData;
-    }
-    function DrawChart(): void {
-        const listData0 = createData("Rec0");
-        const listData1 = createData("Rec1");
+
         // http://bl.ocks.org/d3noob/e34791a32a54e015f57d
-        // https://bl.ocks.org/d3noob/814a2bcb3e7d8d8db74f36f77c8e6b7f
         // https://bl.ocks.org/d3noob/755a069aafbe66f3fd8497b9498df643  <= V4!
 
         var margin = { top: 30, right: 40, bottom: 30, left: 50 },
@@ -39,19 +34,14 @@ namespace LineChart {
         var parseDate = d3.timeParse("%d-%b-%y"); // https://github.com/d3/d3/blob/master/CHANGES.md#time-formats-d3-time-format
 
 
-        // Set the ranges 出力（描画）の範囲
+        // Set the ranges
         const x = d3.scaleTime().range([0, width]);
-        const y0 = d3.scaleLinear().range([height, 0]);
-        const y1 = d3.scaleLinear().range([height, 0]);
+        const y = d3.scaleLinear().range([height, 0]);
 
         // Define the line
-        const line0 = d3.line<Rec>()
+        const line = d3.line<Rec>()
             .x((d) => { return x(d.time) })
-            .y((d) => { return y0(d.value) });
-
-        const line1 = d3.line<Rec>()
-            .x((d) => { return x(d.time) })
-            .y((d) => { return y1(d.value) });
+            .y((d) => { return y(d.value) });
 
         // Adds the svg canvas
         const svg = d3.select("body")
@@ -68,32 +58,20 @@ namespace LineChart {
             .attr("transform", "translate(0," + height + ")")
             .call(<any>xAxis);
 
-        // Scale the range of the data 入力値の範囲
-        // 0 が真ん中に来るようにする
-        x.domain(<[Date, Date]>d3.extent(listData1, (d) => d.time));
-        const max0 = d3.max(listData0, (d) => Math.abs(d.value)) || 0;
-        y0.domain([-max0, max0]);
-        const max1 = d3.max(listData1, (d) => Math.abs(d.value)) || 0;
-        y1.domain([-max1, max1]);
+        // Scale the range of the data
+        x.domain(<[Date, Date]>d3.extent(listData, (d) => d.time));
+        y.domain(<[number, number]>d3.extent(listData, function (d) { return d.value; }));
 
 
         svg.append("path")
             .attr("class", "line")
-            .attr("d", <any>line0(listData0));
-
-        svg.append("path")
-            .attr("class", "line")
-            .attr("d", <any>line1(listData1));
+            .attr("d", <any>line(listData));
 
         // Add the Y Axis
+        const yAxis = d3.axisLeft(y);
         svg.append("g")
             .attr("class", "axis")
-            .call(<any>d3.axisLeft(y0));
-
-        svg.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate( " + width + ", 0 )")
-            .call(<any>d3.axisRight(y1));
+            .call(<any>yAxis);
     }
     DrawChart();
 }

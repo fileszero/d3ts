@@ -62,3 +62,5 @@ typings/
 /dist/*
 /client/data/*
 package-lock.json
+/samples/data/*
+/samples/dist/*

@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import { File } from "../Models";
+import { File } from "../../src";
 
 (async () => {
     const datePerser = d3.timeParse("%b %Y");
