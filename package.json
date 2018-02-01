@@ -3,10 +3,12 @@
   "version": "1.0.0",
   "description": "draw chart with d3",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p ./src/tsconfig.json",
     "sample-w": "webpack --watch --config ./samples/webpack.config.js"
   },
   "author": "files zero",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@types/date-fns": "^2.6.0",
     "@types/query-string": "^5.0.1",
