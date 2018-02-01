@@ -7,19 +7,19 @@ namespace LineChart {
         .text("Sample 3 Line Chart https://dev.classmethod.jp/client-side/javascript/d3-js_linechart_and_barchart/");
 
     class Rec {
-        public Name: string;
-        public time: Date;
-        public value: number;
+        public Name: string = "";
+        public time: Date = new Date();
+        public value: number = 0;
     }
     class Size {
-        public width: number;
-        public height: number;
+        public width: number = 0;
+        public height: number = 0;
     }
     class Margin {
-        public top: number;
-        public right: number;
-        public bottom: number;
-        public left: number;
+        public top: number = 0;
+        public right: number = 0;
+        public bottom: number = 0;
+        public left: number = 0;
     }
     function getContentsSize(container: Size, margin: Margin): Size {
         const result: Size = {

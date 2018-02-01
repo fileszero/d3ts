@@ -50,10 +50,13 @@ export class LineChart<Tx extends number | Date> {
             .attr("width", this.size.width)
             .attr("height", this.size.height);
 
-        // Add the X Axis Area
+        // Add the X Axis Area and Axis
         this.xAxisArea = this.chart.append("g")
             .attr("class", "axis axis--x")
             .attr("transform", "translate(0," + this.size.height + ")");
+
+        this.xAxis = new XAxisDef(this.xAxisArea, "default");
+        this.xAxis.width = this.size.width;
 
         // Add the Y Axis Area (left & right)
         this.yAxisAreaLeft = this.chart.append("g")
@@ -62,25 +65,26 @@ export class LineChart<Tx extends number | Date> {
         this.yAxisAreaRight = this.chart.append("g")
             .attr("class", "axis axis--y--r")
             .attr("transform", "translate( " + this.size.width + ", 0 )")   //
+
+
     }
 
 
     public getLine(lineData: LineSeriesData<Tx>, idx: number): string {
-        let yaxis = this.yAxisDefs.filter((ax) => ax.name === lineData.yAxis)[0];
-        let xaxis = this.xAxis;
-        // Define the line
-        const generator = d3.line<PlotData<Tx>>()
-            .x((d, i) => { return xaxis.scale(d.x) })
-            .y((d, i) => { return yaxis.scale(d.y) });
+        const yaxis = this.yAxisDefs.filter((ax) => ax.name === lineData.yAxis)[0];
+        const xaxis = this.xAxis;
+        if (yaxis && xaxis) {
+            // Define the line
+            const generator = d3.line<PlotData<Tx>>()
+                .x((d, i) => { return xaxis.scale(d.x) })
+                .y((d, i) => { return yaxis.scale(d.y) });
 
-        return generator(lineData.data) || "";
+            return generator(lineData.data) || "";
+        }
+        return "";
     }
 
     protected LoadXAxis(data: LineSeriesData<Tx>[]) {
-        if (!this.xAxis) {
-            this.xAxis = new XAxisDef(this.xAxisArea, "default");
-            this.xAxis.width = this.size.width;
-        }
         for (const line of data) {
             this.xAxis.domain(line.xArray);
         }

@@ -6,9 +6,9 @@ namespace LineChart {
         .text("Sample 3 Line Chart https://dev.classmethod.jp/client-side/javascript/d3-js_linechart_and_barchart/");
 
     class Rec {
-        public Name: string;
-        public time: Date;
-        public value: number;
+        public Name: string = "";
+        public time: Date = new Date();
+        public value: number = 0;
     }
     function createData(Name: string): Rec[] {
         // 時系列データ作成

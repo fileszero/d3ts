@@ -3,8 +3,8 @@ import { BaseType } from "d3";
 
 export namespace Layout {
     export class Size {
-        public width: number;
-        public height: number;
+        public width: number = 0;
+        public height: number = 0;
     }
     export class Margin {
         constructor(src: Margin) {
