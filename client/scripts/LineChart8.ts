@@ -4,7 +4,7 @@ import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { getSeconds } from "date-fns";
 
-import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart } from "../Models";
+import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart } from "../../src/";
 
 import * as queryString from 'query-string';
 

@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { Domain } from "domain";
 import { Layout } from "./layout";
 
 export enum AxisPosition {
