@@ -47,16 +47,17 @@ abstract class AxisDef {
 
     protected max?: number | Date;
     protected min?: number | Date;
-    domain(values: (number | Date)[], reset: boolean = false) {
+    domain(values: (number | Date | undefined)[], reset: boolean = false) {
         if (reset) {
             this.max = undefined;
             this.min = undefined;
         }
-        const max = d3.max(values);
+        const availavle_vals: (number | Date)[] = <(number | Date)[]>values.filter((v) => v != undefined);
+        const max = d3.max(availavle_vals);
         if (max) {
             if (!this.max || max > this.max) this.max = max;
         }
-        const min = d3.min(values);
+        const min = d3.min(availavle_vals);
         if (min) {
             if (!this.min || min < this.min) this.min = min;
         }
@@ -69,7 +70,7 @@ abstract class AxisDef {
     getScale(): ScaleTime<number, number> | ScaleLinear<number, number> | undefined {
         return this.mScale;
     }
-    scale(val: number | Date): number {
+    scale(val: number | Date | undefined): number {
         if (this.isNumber(val)) {
             return (<ScaleLinear<number, number>>this.mScale)(val);
         }

@@ -43,7 +43,7 @@ namespace LineChart8 {
             for (const series of data) {
                 const rec = new PlotData<Date>();
                 rec.x = x;
-                rec.y = parseFloat(row[series.name] || "0");
+                rec.y = parseFloat(row[series.name] || "");
                 series.data.push(rec);
             }
         }

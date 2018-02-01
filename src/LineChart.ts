@@ -75,7 +75,9 @@ export class LineChart<Tx extends number | Date> {
         const xaxis = this.xAxis;
         if (yaxis && xaxis) {
             // Define the line
+            // https://bl.ocks.org/mbostock/0533f44f2cfabecc5e3a    //missing data
             const generator = d3.line<PlotData<Tx>>()
+                .defined((d, i, arr) => { return d.y ? true : false; })
                 .x((d, i) => { return xaxis.scale(d.x) })
                 .y((d, i) => { return yaxis.scale(d.y) });
 
