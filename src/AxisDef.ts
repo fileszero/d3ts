@@ -107,7 +107,7 @@ export abstract class AxisDef {
         this.updateScale();
     }
 
-    show(animate: number = 500): void {
+    draw(animate: number = 500): void {
         const scale = this.updateScale();
         if (!scale) return; // need scale
         this.drawArea.exit().remove();

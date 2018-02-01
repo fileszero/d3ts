@@ -3,8 +3,15 @@ export class PlotData<Tx extends number | Date>{
     public y: number | undefined;
 }
 
-export class LineSeriesData<Tx extends number | Date> {
+export interface SeriesData {
+    name: string;
+    id: string;
+    color: string;
+}
+
+export class LineSeriesData<Tx extends number | Date> implements SeriesData {
     public name: string = "default";
+    public id: string = "";
     public yAxis: string = "default";
     public color: string = "";
     public width: number = 1;

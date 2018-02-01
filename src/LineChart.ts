@@ -1,9 +1,7 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Layout } from "./layout"
-import { YAxisDef, XAxisDef, AxisPosition } from "./AxisDef"
-import { LineSeriesData, PlotData } from "./data";
+import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition } from ".";
 
 export class LineChart<Tx extends number | Date> {
     /** xの描画範囲 */
@@ -11,7 +9,6 @@ export class LineChart<Tx extends number | Date> {
     /** */
     public size: Layout.Size;
     public margin: Layout.Margin;
-    public xAxis: XAxisDef;
 
     // 表示領域
     public chart: Selection<BaseType, {}, HTMLElement, any>;
@@ -19,13 +16,22 @@ export class LineChart<Tx extends number | Date> {
     private xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
     private yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
     private yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
+    // 軸
+    public xAxis: XAxisDef;
     private yAxisDefs: YAxisDef[] = [];
 
+    // 凡例
+    private Legend: Legend;
     protected colors: d3.ScaleOrdinal<string, string>;
 
+    // 各種Id
     protected static ChartId = 0;
+
+    public chartId: string;
     constructor(container: Selection<BaseType, {}, HTMLElement, any>, chartMargin: Layout.Margin) {
         LineChart.ChartId++;
+        // Id
+        this.chartId = "line-chart-" + LineChart.ChartId;
         this.colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
         this.margin = new Layout.Margin(chartMargin);
@@ -39,7 +45,7 @@ export class LineChart<Tx extends number | Date> {
             .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")");
 
         // 線を引くエリア
-        const clip_id = "LineChartclip" + LineChart.ChartId;
+        const clip_id = this.chartId + "-clip";
         this.plotArea = this.chart.append("g")
             .attr("clip-path", "url(#" + clip_id + ")")
             .attr("class", "plotArea");
@@ -66,7 +72,8 @@ export class LineChart<Tx extends number | Date> {
             .attr("class", "axis axis--y--r")
             .attr("transform", "translate( " + this.size.width + ", 0 )")   //
 
-
+        // legend
+        this.Legend = new Legend(this.chart);
     }
 
 
@@ -123,19 +130,23 @@ export class LineChart<Tx extends number | Date> {
         }
     }
     public LoadData(data: LineSeriesData<Tx>[]) {
-        this.LoadXAxis(data);
-        this.LoadYAxis(data);
-
-
 
         // color
         let i = 0;
         for (const series of data) {
-            if (!series.color) {
+            if (!series.color) {    // assign color
                 series.color = this.colors(i.toString());
+            }
+            if (series.id === "") { // assign id
+                series.id = this.chartId + "-path-" + i + "-" + series.name.replace(/\s+/g, '');
             }
             i++;
         }
+
+        this.LoadXAxis(data);
+        this.LoadYAxis(data);
+        this.Legend.LoadData(data);
+
         // https://stackoverflow.com/questions/34088550/d3-how-to-refresh-a-chart-with-new-data
         // New data should be added to pie using enter()
         // http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
@@ -150,23 +161,29 @@ export class LineChart<Tx extends number | Date> {
         const selection = graph.enter()
             .append("path") //create any new path needed // データをバインドし、要素を追加(この時点で初めてDOMにタグが挿入)
             .attr("class", "series")   // バインドされたデータを使用して要素を操作
+            .attr("id", (d, i) => d.id)
             .attr("stroke", (d, i) => d.color)
             .style("stroke-width", (d, i) => d.width) // 線の太さを決める
             //.attr("d", (d, i) => this.getLine(d, i))
             ;
         // redraw exist path
-        this.redraw();
+        this.draw();
         // and old data should be removed using exit().remove()
         // graph.transition().delay(500).duration(1000)
 
     }
 
-    redraw(animate: number = 500) {
-        this.xAxis.show(animate);
+    draw(animate: number = 500) {
+        // 軸
+        this.xAxis.draw(animate);
         for (const yaxis of this.yAxisDefs) {   // 描画
-            yaxis.show(animate);
+            yaxis.draw(animate);
         }
 
+        // 凡例
+        this.Legend.draw(animate);
+
+        //　線
         const graph = this.plotArea.selectAll<BaseType, LineSeriesData<Tx>>("path");
         graph
             .transition().duration(animate)

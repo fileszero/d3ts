@@ -58,7 +58,7 @@ export class ZoomableLineChart<Tx extends number | Date> {
             // console.log("zoomed");
             var t = d3.event.transform;
             main.xAxis.domain(t.rescaleX(sub.xAxis.getScale()).domain(), true);
-            main.redraw(100);
+            main.draw(100);
             RangeSelecterUI.call(<any>brush.move, main.xAxis.range().map(t.invertX, t));
         }
 
