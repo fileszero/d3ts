@@ -1,11 +1,13 @@
 import { Layout } from ".";
 import { Selection } from "d3-selection";
-import { BaseType } from "d3";
+import { BaseType, Transition, EnterElement } from "d3";
 import { util } from "./util";
 
 export interface ChartCanvas extends Selection<BaseType, {}, HTMLElement, any> {
-
 }
+export interface ChartTransition extends Transition<Element | EnterElement | Document | Window | null, {}, HTMLElement, any> {
+}
+
 export interface ChartParts {
     id: string;
     size: Layout.Size;

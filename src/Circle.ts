@@ -1,4 +1,5 @@
 import { ChartPartsImpl, ChartParts, ChartCanvas, ChartDataParts, Fill } from ".";
+import { util } from "./util";
 
 export interface CircleAttr extends Fill {
     // https://developer.mozilla.org/ja/docs/Web/SVG/Element/circle
@@ -30,12 +31,7 @@ export class Circle extends ChartPartsImpl implements ChartDataParts<CircleAttr>
         if (!this.shape) {
             this.shape = canvas.append("circle");
         }
-        for (let attr in this.data) {
-            const val = this.data[attr];
-            if (val) {
-                this.shape.attr(attr, val)
-            }
-        }
-        this.shape.transition().duration(animate);
+        const anime = this.shape.transition().duration(animate);
+        util.applySvgAttr(anime, this.data);
     }
 }

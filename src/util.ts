@@ -1,3 +1,5 @@
+import { ChartCanvas, SvgAttr, ChartTransition } from ".";
+
 export namespace util {
     export function id(): string {
         return '_' + Math.random().toString(36).substr(2, 9);
@@ -9,4 +11,12 @@ export namespace util {
         return (<number>val).toPrecision !== undefined;
     }
 
+    export function applySvgAttr(canvas: ChartCanvas | ChartTransition, svgAttr: SvgAttr) {
+        for (let attr in svgAttr) {
+            const val = svgAttr[attr];
+            if (val) {
+                canvas.attr(attr, val)
+            }
+        }
+    }
 }

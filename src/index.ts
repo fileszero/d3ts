@@ -12,6 +12,7 @@ export * from "./LineChart";
 export * from "./ZoomableLineChart";
 
 export * from "./Circle";
+export * from "./Path";
 
 export * from "./AxisDef";
 export * from "./legend";
