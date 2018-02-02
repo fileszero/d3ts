@@ -16,7 +16,7 @@ export abstract class AxisDef implements ChartDataParts<number | Date> {
         this.className = className;
         this.parentArea = parentArea;
         this.position = position;
-        this.drawArea = this.parentArea.append("g");
+        this.canvas = this.parentArea.append("g");
         this.id = util.id();
     }
     public id: string;
@@ -45,7 +45,7 @@ export abstract class AxisDef implements ChartDataParts<number | Date> {
 
     // 表示エリア
     public parentArea: Selection<BaseType, {}, HTMLElement, any>;
-    public drawArea: Selection<BaseType, {}, HTMLElement, any>;
+    public canvas: Selection<BaseType, {}, HTMLElement, any>;
 
     protected max?: number | Date;
     protected min?: number | Date;
@@ -110,8 +110,8 @@ export abstract class AxisDef implements ChartDataParts<number | Date> {
     draw(animate: number = 500): void {
         const scale = this.updateScale();
         if (!scale) return; // need scale
-        this.drawArea.exit().remove();
-        this.drawArea
+        this.canvas.exit().remove();
+        this.canvas
             .attr("class", this.className)
             .attr("stroke", this.color);
         //.attr("transform", "translate(0," + this.parentArea.size..size.height + ")");
@@ -133,10 +133,10 @@ export abstract class AxisDef implements ChartDataParts<number | Date> {
 
         const axis = axisFunc(scale);
         if (x_offset != 0 || y_offset != 0) {
-            this.drawArea.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
+            this.canvas.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }
 
-        this.drawArea.transition().duration(animate)
+        this.canvas.transition().duration(animate)
             .call(<any>axis);
     }
 

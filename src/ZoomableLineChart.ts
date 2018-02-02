@@ -24,7 +24,7 @@ export class ZoomableLineChart<Tx extends number | Date> {
             .extent([[0, 0], [sub.size.width, sub.size.height]])
             .on("brush end", brushed);
 
-        const RangeSelecterUI = sub.chart.append("g")
+        const RangeSelecterUI = sub.canvas.append("g")
             .attr("class", "brush")
             .call(<any>brush)
             //.call(<any>brush.move, main.xScale.range());  //全範囲選択
@@ -37,7 +37,7 @@ export class ZoomableLineChart<Tx extends number | Date> {
             .extent([[0, 0], [main.size.width, main.size.height]])
             .on("zoom", zoomed);
 
-        const ZoomUI = main.chart.append("rect")
+        const ZoomUI = main.canvas.append("rect")
             .attr("class", "zoom")
             .attr("width", main.size.width)
             .attr("height", main.size.height)

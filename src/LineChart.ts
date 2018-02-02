@@ -12,7 +12,7 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
     public margin: Layout.Margin;
 
     // 表示領域
-    public chart: Selection<BaseType, {}, HTMLElement, any>;
+    public canvas: Selection<BaseType, {}, HTMLElement, any>;
     private plotArea: Selection<BaseType, {}, HTMLElement, any>;
     private xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
     private yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
@@ -37,14 +37,14 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
         // Setting up Size
         this.size = Layout.getContentsSize(svgSize, chartMargin);
         //　チャートの全体
-        this.chart = container
+        this.canvas = container
             .append("g")
             .attr("class", "chart")
             .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")");
 
         // 線を引くエリア
         const clip_id = this.id + "-clip";
-        this.plotArea = this.chart.append("g")
+        this.plotArea = this.canvas.append("g")
             .attr("clip-path", "url(#" + clip_id + ")")
             .attr("class", "plotArea");
 
@@ -55,7 +55,7 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
             .attr("height", this.size.height);
 
         // Add the X Axis Area and Axis
-        this.xAxisArea = this.chart.append("g")
+        this.xAxisArea = this.canvas.append("g")
             .attr("class", "axis axis--x")
             .attr("transform", "translate(0," + this.size.height + ")");
 
@@ -63,15 +63,15 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
         this.xAxis.size.width = this.size.width;
 
         // Add the Y Axis Area (left & right)
-        this.yAxisAreaLeft = this.chart.append("g")
+        this.yAxisAreaLeft = this.canvas.append("g")
             .attr("class", "axis axis--y--l");
 
-        this.yAxisAreaRight = this.chart.append("g")
+        this.yAxisAreaRight = this.canvas.append("g")
             .attr("class", "axis axis--y--r")
             .attr("transform", "translate( " + this.size.width + ", 0 )")   //
 
         // legend
-        this.Legend = new Legend(this.chart);
+        this.Legend = new Legend(this.canvas);
     }
 
 

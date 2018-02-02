@@ -75,7 +75,9 @@ namespace LineChart8 {
         const yaxis_width = 20 * listData.length; //Y軸メモリ分確保
         const margin = new Layout.Margin({ top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 });
 
-        const chart = new ZoomableLineChart<Date>(svg._svg, margin);
+
+        if (!svg.canvas) throw "no selection";
+        const chart = new ZoomableLineChart<Date>(svg.canvas, margin);
         chart.LoadData(listData);
         return chart;
 
