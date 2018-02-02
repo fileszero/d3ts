@@ -17,6 +17,7 @@ module.exports = {
         s11csvread: path.join(__dirname, 'scripts/s11csvread.ts'),
         s12lineChart8: path.join(__dirname, 'scripts/LineChart8.ts'),
         client: path.join(__dirname, 'scripts/hello.ts'),
+        s13lineChart9: path.join(__dirname, 'scripts/lineChart9.ts'),
     },
     externals: {
         'd3': 'd3'

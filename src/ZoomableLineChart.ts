@@ -18,6 +18,8 @@ export class ZoomableLineChart<Tx extends number | Date> {
 
         this.main = main;
         this.sub = sub;
+        if (!main.canvas) throw "no main chart"
+        if (!sub.canvas) throw "no sub chart"
         //return;
         /// サブチャートに範囲選択UIを追加
         var brush = d3.brushX()

@@ -15,19 +15,27 @@ export interface ChartParts {
 export abstract class ChartPartsImpl implements ChartParts {
     constructor() {
         this.id = util.id();
-        this.size = new Layout.Size();
+        this._size = new Layout.Size(undefined, this.onResize);
     }
-    id: string;
-    size: Layout.Size;
+    public id: string;
+    private _size: Layout.Size;
+    get size() { return this._size; }
     canvas: ChartCanvas | undefined;
-    abstract draw(animate: number): void;
+    draw(animate: number): void {
+        if (!this.canvas) throw "no canvas of " + this.id;
+        this.drawSelf(this.canvas, animate);
+        this.drawChild(animate);
+    }
+    protected abstract drawSelf(canvas: ChartCanvas, animate: number): void;
+
+    onResize(size: Layout.Size) { }
     private parts: ChartParts[] = [];
     addParts(parts: ChartParts) {
         if (!this.parts.some((p) => p.id === parts.id)) {
             this.parts.push(parts);
         }
     }
-    protected drawChild(animate: number) {
+    private drawChild(animate: number) {
         if (!this.canvas) throw "no canvas";
         for (const part of this.parts) {
             if (!part.canvas) {

@@ -9,8 +9,7 @@ export namespace Layout {
     export class Size implements ISize {
         constructor(src?: ISize, onChange?: (size: Size) => void) {
             if (src) {
-                this.width = src.width;
-                this.height = src.height;
+                this.set(src);
             }
             this.onChange = onChange;
         }
@@ -27,6 +26,12 @@ export namespace Layout {
         get height() { return this._data.height; }
         set height(val: number) {
             this._data.height = val;
+            this.changed();
+        }
+
+        set(src: ISize) {
+            this._data.width = src.width;
+            this._data.height = src.height;
             this.changed();
         }
     }

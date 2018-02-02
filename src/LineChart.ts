@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition, ChartDataParts } from ".";
+import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition, ChartDataParts, ChartPartsImpl, ChartCanvas } from ".";
 import { util } from "./util";
 
-export class LineChart<Tx extends number | Date> implements ChartDataParts<LineSeriesData<Tx>>{
+export class LineChart<Tx extends number | Date> extends ChartPartsImpl implements ChartDataParts<LineSeriesData<Tx>>{
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */
@@ -12,7 +12,6 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
     public margin: Layout.Margin;
 
     // 表示領域
-    public canvas: Selection<BaseType, {}, HTMLElement, any>;
     private plotArea: Selection<BaseType, {}, HTMLElement, any>;
     private xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
     private yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
@@ -25,11 +24,9 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
     private Legend: Legend;
     protected colors: d3.ScaleOrdinal<string, string>;
 
-    // 各種Id
-    public id: string;
     constructor(container: Selection<BaseType, {}, HTMLElement, any>, chartMargin: Layout.Margin) {
+        super();
         // Id
-        this.id = "line-chart-" + util.id();
         this.colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
         this.margin = new Layout.Margin(chartMargin);
@@ -168,13 +165,13 @@ export class LineChart<Tx extends number | Date> implements ChartDataParts<LineS
             //.attr("d", (d, i) => this.getLine(d, i))
             ;
         // redraw exist path
-        this.draw();
+        this.draw(500);
         // and old data should be removed using exit().remove()
         // graph.transition().delay(500).duration(1000)
 
     }
 
-    draw(animate: number = 500) {
+    drawSelf(canvas: ChartCanvas, animate: number = 500) {
         // 軸
         this.xAxis.draw(animate);
         for (const yaxis of this.yAxisDefs) {   // 描画
