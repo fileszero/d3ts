@@ -4,7 +4,7 @@ import { Selection } from "d3-selection";
 import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition, ChartDataParts, ChartPartsImpl, ChartCanvas } from ".";
 import { util } from "./util";
 
-export class LineChart<Tx extends number | Date> extends ChartPartsImpl implements ChartDataParts<LineSeriesData<Tx>>{
+export class LineChart<Tx extends number | Date> extends ChartPartsImpl implements ChartDataParts<LineSeriesData<Tx>[]>{
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */

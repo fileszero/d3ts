@@ -10,7 +10,7 @@ export enum AxisPosition {
     Bottom,
     Left
 }
-export abstract class AxisDef implements ChartDataParts<number | Date> {
+export abstract class AxisDef implements ChartDataParts<(number | Date)[]> {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string, className: string, position: AxisPosition) {
         this.name = name;
         this.className = className;

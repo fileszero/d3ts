@@ -1,6 +1,8 @@
 export * from "./layout";
 export * from "./file";
 
+export * from "./SvgAttr";
+
 export * from "./data";
 
 export * from "./ChartParts";

@@ -48,6 +48,6 @@ export abstract class ChartPartsImpl implements ChartParts {
 }
 
 export interface ChartDataParts<T> extends ChartParts {
-    loadData(data: T[], reset?: boolean): void;
+    loadData(data: T, reset?: boolean): void;
     clearData(): void;
 }
