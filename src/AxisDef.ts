@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { ChartParts, Layout } from ".";
+import { ChartDataParts, Layout } from ".";
 import { util } from "./util";
 
 export enum AxisPosition {
@@ -10,7 +10,7 @@ export enum AxisPosition {
     Bottom,
     Left
 }
-export abstract class AxisDef implements ChartParts<number | Date> {
+export abstract class AxisDef implements ChartDataParts<number | Date> {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string, className: string, position: AxisPosition) {
         this.name = name;
         this.className = className;

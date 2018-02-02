@@ -5,6 +5,7 @@ export * from "./data";
 
 export * from "./ChartParts";
 
+export * from "./Svg";
 export * from "./LineChart";
 export * from "./ZoomableLineChart";
 

@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition, ChartParts } from ".";
+import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition, ChartDataParts } from ".";
 import { util } from "./util";
 
-export class LineChart<Tx extends number | Date> implements ChartParts<LineSeriesData<Tx>>{
+export class LineChart<Tx extends number | Date> implements ChartDataParts<LineSeriesData<Tx>>{
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */

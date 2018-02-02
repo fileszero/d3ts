@@ -4,7 +4,7 @@ import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { getSeconds } from "date-fns";
 
-import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart } from "../../src/";
+import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart, Svg } from "../../src/";
 
 import * as queryString from 'query-string';
 
@@ -64,16 +64,18 @@ namespace LineChart8 {
 
 
         // Adds the svg canvas
-        const svg = d3.select("#chart")
-            .append("svg")
-            .attr("width", svgSize.width)
-            .attr("height", svgSize.height);
+        // const svg = d3.select("#chart")
+        //     .append("svg")
+        //     .attr("width", svgSize.width)
+        //     .attr("height", svgSize.height);
+
+        const svg = new Svg("#chart", svgSize);
 
         // Setting up Margins
         const yaxis_width = 20 * listData.length; //Y軸メモリ分確保
         const margin = new Layout.Margin({ top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 });
 
-        const chart = new ZoomableLineChart<Date>(svg, margin);
+        const chart = new ZoomableLineChart<Date>(svg._svg, margin);
         chart.LoadData(listData);
         return chart;
 
