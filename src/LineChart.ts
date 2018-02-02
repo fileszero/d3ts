@@ -1,9 +1,10 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition } from ".";
+import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, AxisPosition, ChartParts } from ".";
+import { util } from "./util";
 
-export class LineChart<Tx extends number | Date> {
+export class LineChart<Tx extends number | Date> implements ChartParts<LineSeriesData<Tx>>{
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */
@@ -25,13 +26,10 @@ export class LineChart<Tx extends number | Date> {
     protected colors: d3.ScaleOrdinal<string, string>;
 
     // 各種Id
-    protected static ChartId = 0;
-
-    public chartId: string;
+    public id: string;
     constructor(container: Selection<BaseType, {}, HTMLElement, any>, chartMargin: Layout.Margin) {
-        LineChart.ChartId++;
         // Id
-        this.chartId = "line-chart-" + LineChart.ChartId;
+        this.id = "line-chart-" + util.id();
         this.colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
         this.margin = new Layout.Margin(chartMargin);
@@ -45,7 +43,7 @@ export class LineChart<Tx extends number | Date> {
             .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")");
 
         // 線を引くエリア
-        const clip_id = this.chartId + "-clip";
+        const clip_id = this.id + "-clip";
         this.plotArea = this.chart.append("g")
             .attr("clip-path", "url(#" + clip_id + ")")
             .attr("class", "plotArea");
@@ -62,7 +60,7 @@ export class LineChart<Tx extends number | Date> {
             .attr("transform", "translate(0," + this.size.height + ")");
 
         this.xAxis = new XAxisDef(this.xAxisArea, "default");
-        this.xAxis.width = this.size.width;
+        this.xAxis.size.width = this.size.width;
 
         // Add the Y Axis Area (left & right)
         this.yAxisAreaLeft = this.chart.append("g")
@@ -83,7 +81,7 @@ export class LineChart<Tx extends number | Date> {
         if (yaxis && xaxis) {
             // Define the line
             // https://bl.ocks.org/mbostock/0533f44f2cfabecc5e3a    //missing data
-            const generator = d3.line<PlotData<Tx>>()
+            const generator = d3.line<PlotData<number | Date>>()
                 .defined((d, i, arr) => { return d.y ? true : false; })
                 .x((d, i) => { return xaxis.scale(d.x) })
                 .y((d, i) => { return yaxis.scale(d.y) });
@@ -95,7 +93,7 @@ export class LineChart<Tx extends number | Date> {
 
     protected LoadXAxis(data: LineSeriesData<Tx>[]) {
         for (const line of data) {
-            this.xAxis.domain(line.xArray);
+            this.xAxis.loadData(line.xArray);
         }
     }
 
@@ -117,19 +115,22 @@ export class LineChart<Tx extends number | Date> {
                     yaxis.position = AxisPosition.Right;
                     yaxis.positionOffset = (axis_idx - 1) * 20;
                 }
-                yaxis.width = 20;
-                yaxis.height = this.size.height;
+                yaxis.size.width = 20;
+                yaxis.size.height = this.size.height;
                 yaxis.color = this.colors(axis_idx.toString())
                 this.yAxisDefs.push(yaxis);
             }
             //domain 評価
             const ydatas = data.filter((d) => d.yAxis === axis_key);
             for (const ydata of ydatas) {
-                yaxis.domain(ydata.yArray);
+                yaxis.loadData(ydata.yArray);
             }
         }
     }
-    public LoadData(data: LineSeriesData<Tx>[]) {
+    public clearData() {
+        this.plotArea.selectAll("path").remove();
+    }
+    public loadData(data: LineSeriesData<Tx>[]) {
 
         // color
         let i = 0;
@@ -138,7 +139,7 @@ export class LineChart<Tx extends number | Date> {
                 series.color = this.colors(i.toString());
             }
             if (series.id === "") { // assign id
-                series.id = this.chartId + "-path-" + i + "-" + series.name.replace(/\s+/g, '');
+                series.id = this.id + "-path-" + i + "-" + series.name.replace(/\s+/g, '');
             }
             i++;
         }
@@ -181,7 +182,7 @@ export class LineChart<Tx extends number | Date> {
         }
 
         // 凡例
-        this.Legend.draw(animate);
+        //this.Legend.draw(animate);
 
         //　線
         const graph = this.plotArea.selectAll<BaseType, LineSeriesData<Tx>>("path");

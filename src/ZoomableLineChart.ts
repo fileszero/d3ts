@@ -11,8 +11,8 @@ export class ZoomableLineChart<Tx extends number | Date> {
     protected sub: LineChart<Tx>;
     constructor(container: Selection<BaseType, {}, HTMLElement, any>, chartMargin: Layout.Margin) {
         const svgSize = Layout.getSize(container);
-        const mainMargin = { top: chartMargin.top, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom + 100 };
-        const subMargin = { top: svgSize.height - 100, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom };
+        const mainMargin = new Layout.Margin({ top: chartMargin.top, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom + 100 });
+        const subMargin = new Layout.Margin({ top: svgSize.height - 100, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom });
         const main = new LineChart<Tx>(container, mainMargin);
         const sub = new LineChart<Tx>(container, subMargin);
 
@@ -57,7 +57,7 @@ export class ZoomableLineChart<Tx extends number | Date> {
             if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
             // console.log("zoomed");
             var t = d3.event.transform;
-            main.xAxis.domain(t.rescaleX(sub.xAxis.getScale()).domain(), true);
+            main.xAxis.loadData(t.rescaleX(sub.xAxis.getScale()).domain(), true);
             main.draw(100);
             RangeSelecterUI.call(<any>brush.move, main.xAxis.range().map(t.invertX, t));
         }
@@ -65,7 +65,7 @@ export class ZoomableLineChart<Tx extends number | Date> {
     }
 
     public LoadData(data: LineSeriesData<Tx>[]) {
-        this.main.LoadData(data);
-        this.sub.LoadData(data);
+        this.main.loadData(data);
+        this.sub.loadData(data);
     }
 }

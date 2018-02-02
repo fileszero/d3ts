@@ -1,7 +1,8 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { Layout } from "./layout";
+import { ChartParts, Layout } from ".";
+import { util } from "./util";
 
 export enum AxisPosition {
     Top,
@@ -9,26 +10,27 @@ export enum AxisPosition {
     Bottom,
     Left
 }
-export abstract class AxisDef {
+export abstract class AxisDef implements ChartParts<number | Date> {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string, className: string, position: AxisPosition) {
         this.name = name;
         this.className = className;
         this.parentArea = parentArea;
         this.position = position;
         this.drawArea = this.parentArea.append("g");
+        this.id = util.id();
     }
-
+    public id: string;
     public name: string;
 
     //
     updateScale(): AxisScale<number | Date | { valueOf(): number; }> | undefined {
         if (this.max && this.min) {
-            if (this.isDate(this.max)) {
-                this.mScale = d3.scaleTime().range([this.height, this.width]);    // Yの描画範囲
+            if (util.isDate(this.max)) {
+                this.mScale = d3.scaleTime().range([this.size.height, this.size.width]);    // Yの描画範囲
                 this.mScale.domain([this.min, this.max]);
             }
-            if (this.isNumber(this.max)) {
-                this.mScale = d3.scaleLinear().range([this.height, this.width]);    // Yの描画範囲
+            if (util.isNumber(this.max)) {
+                this.mScale = d3.scaleLinear().range([this.size.height, this.size.width]);    // Yの描画範囲
                 this.mScale.domain([this.min, this.max]);
             }
         }
@@ -47,10 +49,9 @@ export abstract class AxisDef {
 
     protected max?: number | Date;
     protected min?: number | Date;
-    domain(values: (number | Date | undefined)[], reset: boolean = false) {
+    loadData(values: (number | Date | undefined)[], reset: boolean = false) {
         if (reset) {
-            this.max = undefined;
-            this.min = undefined;
+            this.clearData();
         }
         const availavle_vals: (number | Date)[] = <(number | Date)[]>values.filter((v) => v != undefined);
         const max = d3.max(availavle_vals);
@@ -63,6 +64,10 @@ export abstract class AxisDef {
         }
         this.updateScale();
     }
+    clearData() {
+        this.max = undefined;
+        this.min = undefined;
+    }
     range(): number[] {
         return this.mScale ? this.mScale.range() : [];
     }
@@ -71,10 +76,10 @@ export abstract class AxisDef {
         return this.mScale;
     }
     scale(val: number | Date | undefined): number {
-        if (this.isNumber(val)) {
+        if (util.isNumber(val)) {
             return (<ScaleLinear<number, number>>this.mScale)(val);
         }
-        if (this.isDate(val)) {
+        if (util.isDate(val)) {
             return (<ScaleTime<number, number>>this.mScale)(val);
         }
         return 0;
@@ -87,23 +92,18 @@ export abstract class AxisDef {
                 range = scale.range();
             }
             const newXDomain = range.map((r) => scale.invert(r));
-            this.domain(newXDomain);
+            this.loadData(newXDomain);
             return range;
         }
         return [];
     }
 
-    protected mHeight: number = 0;
-    get height() { return this.mHeight; }
-    set height(val: number) {
-        this.mHeight = val;
-        this.updateScale();
+    protected mSize: Layout.Size = new Layout.Size({ width: 0, height: 0 }, (size) => this.updateScale());
+    get size() {
+        return this.mSize;
     }
-
-    protected mWidth: number = 0;
-    get width() { return this.mWidth; }
-    set width(val: number) {
-        this.mWidth = val;
+    set size(val) {
+        this.mSize = val;
         this.updateScale();
     }
 
@@ -142,12 +142,6 @@ export abstract class AxisDef {
 
     remove(): void {
         this.parentArea.select("." + this.className).remove();
-    }
-    protected isDate(val: Date | any): val is Date {
-        return (<Date>val).getDate !== undefined;
-    }
-    protected isNumber(val: number | any): val is number {
-        return (<number>val).toPrecision !== undefined;
     }
 
 }
