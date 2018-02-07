@@ -4,7 +4,7 @@ import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { getSeconds } from "date-fns";
 
-import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart, Svg } from "../../src/";
+import { Layout, File, LineSeriesData, PlotData, ZoomableLineChart, Svg, LineChart, ChartParts } from "../../src/";
 
 import * as queryString from 'query-string';
 
@@ -49,7 +49,7 @@ namespace LineChart8 {
         }
         return data;
     }
-    async function DrawChart(): Promise<ZoomableLineChart<Date>> {
+    async function DrawChart(): Promise<ChartParts> {
         const listData = await readData();
 
         const string_result = document.getElementById("string_result");
@@ -76,9 +76,10 @@ namespace LineChart8 {
         const margin = new Layout.Margin({ top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 });
 
 
-        if (!svg.canvas) throw "no selection";
-        const chart = new ZoomableLineChart<Date>(svg.canvas, margin);
-        chart.LoadData(listData);
+        const chart = new LineChart<Date>(svg.size, margin);  //ZoomableLineChart
+        svg.addParts(chart);
+        chart.loadData(listData);
+        svg.draw(500);
         return chart;
 
     }

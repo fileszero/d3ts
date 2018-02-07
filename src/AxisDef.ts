@@ -1,17 +1,77 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { ChartDataParts, Layout } from ".";
+import { ChartDataParts, Layout, ScaleParts, Scale } from ".";
 import { util } from "./util";
 
-export enum AxisPosition {
-    Top,
-    Right,
-    Bottom,
-    Left
+export type AxisValueType = number | Date;
+export abstract class AxisArea extends ChartDataParts<AxisValueType[]> implements ScaleParts {
+    constructor(name: string, position: Layout.Position) {
+        super("g");
+        this.name = name;
+        this.position = position;
+    }
+    public name: string;
+    public xscale: Scale = new Scale();
+    public yscale: Scale = new Scale();
+    abstract get scale(): Scale;
+
+
+    public position: Layout.Position;  //default
+    public positionOffset: number = 0;
+
+    drawSelf(animate: number): void {
+        if (!this.shape) throw "No shape";
+        if (!this.data) throw "No data";
+
+        // scale実サイズ
+        this.xscale.range = [0, this.size.width];
+        this.yscale.range = [0, this.size.height];
+        this.xscale.loadData(this.data);
+        this.yscale.loadData(this.data);
+
+        const axis_scale = this.scale.getD3Scale();
+        if (!axis_scale) throw "No scale";
+
+        let axisFunc = d3.axisLeft;   // default left
+        let x_offset = 0, y_offset = 0;
+        if (this.position === Layout.Position.Left) {
+            axisFunc = d3.axisLeft;
+            x_offset = this.positionOffset;
+        } else if (this.position === Layout.Position.Right) {
+            axisFunc = d3.axisRight;
+            x_offset = this.positionOffset;
+        } else if (this.position === Layout.Position.Top) {
+            axisFunc = d3.axisTop;
+            y_offset = this.positionOffset;
+        } else if (this.position === Layout.Position.Bottom) {
+            axisFunc = d3.axisBottom;
+            y_offset = this.positionOffset;
+        }
+
+        const axis = axisFunc(axis_scale);
+        if (x_offset != 0 || y_offset != 0) {
+            this.shape.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
+        }
+
+        this.shape.transition().duration(animate)
+            .call(<any>axis);
+
+    }
 }
+
+
+export class XAxisArea extends AxisArea {
+    constructor(name: string, position?: Layout.Position) {
+        super(name, position || Layout.Position.Bottom);
+    }
+    get scale(): Scale {
+        return this.xscale;
+    }
+}
+
 export abstract class AxisDef implements ChartDataParts<(number | Date)[]> {
-    constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string, className: string, position: AxisPosition) {
+    constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string, className: string, position: Layout.Position) {
         this.name = name;
         this.className = className;
         this.parentArea = parentArea;
@@ -40,7 +100,7 @@ export abstract class AxisDef implements ChartDataParts<(number | Date)[]> {
     // 表示属性
     public className: string;
     public color: string = "";
-    public position: AxisPosition;  //default
+    public position: Layout.Position;  //default
     public positionOffset: number = 0;
 
     // 表示エリア
@@ -117,16 +177,16 @@ export abstract class AxisDef implements ChartDataParts<(number | Date)[]> {
         //.attr("transform", "translate(0," + this.parentArea.size..size.height + ")");
         let axisFunc = d3.axisLeft;   // default left
         let x_offset = 0, y_offset = 0;
-        if (this.position === AxisPosition.Left) {
+        if (this.position === Layout.Position.Left) {
             axisFunc = d3.axisLeft;
             x_offset = this.positionOffset;
-        } else if (this.position === AxisPosition.Right) {
+        } else if (this.position === Layout.Position.Right) {
             axisFunc = d3.axisRight;
             x_offset = this.positionOffset;
-        } else if (this.position === AxisPosition.Top) {
+        } else if (this.position === Layout.Position.Top) {
             axisFunc = d3.axisTop;
             y_offset = this.positionOffset;
-        } else if (this.position === AxisPosition.Bottom) {
+        } else if (this.position === Layout.Position.Bottom) {
             axisFunc = d3.axisBottom;
             y_offset = this.positionOffset;
         }
@@ -147,13 +207,13 @@ export abstract class AxisDef implements ChartDataParts<(number | Date)[]> {
 }
 export class YAxisDef extends AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string) {
-        super(parentArea, name, "yaxis--" + name, AxisPosition.Left);
+        super(parentArea, name, "yaxis--" + name, Layout.Position.Left);
     }
 }
 
 export class XAxisDef extends AxisDef {
     constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>, name: string) {
-        super(parentArea, name, "xaxis--" + name, AxisPosition.Bottom);
+        super(parentArea, name, "xaxis--" + name, Layout.Position.Bottom);
     }
 
 }

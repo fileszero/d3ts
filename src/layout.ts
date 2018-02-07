@@ -1,7 +1,14 @@
 import { Selection } from "d3-selection";
 import { BaseType } from "d3";
 
+
 export namespace Layout {
+    export enum Position {
+        Top,
+        Right,
+        Bottom,
+        Left
+    }
     export interface ISize {
         width: number;
         height: number;
@@ -33,6 +40,13 @@ export namespace Layout {
             this._data.width = src.width;
             this._data.height = src.height;
             this.changed();
+        }
+
+        subMargin(margin: IMargin): Size {
+            var result = new Size(this);
+            result.width -= (margin.left + margin.right);
+            result.height -= (margin.top + margin.bottom);
+            return result;
         }
     }
     export interface IMargin {

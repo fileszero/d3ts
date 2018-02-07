@@ -6,6 +6,7 @@ export * from "./SvgAttr";
 export * from "./data";
 
 export * from "./ChartParts";
+export * from "./Scale";
 
 export * from "./Svg";
 export * from "./LineChart";

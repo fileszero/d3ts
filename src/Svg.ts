@@ -3,23 +3,16 @@ import d3 = require("d3");
 
 export class Svg extends ChartPartsImpl {
     constructor(container_selector: string, size?: Layout.ISize) {
-        super();
-        this.selector = container_selector;
+        super("svg", container_selector);
         if (size) {
             this.size.set(size);
         }
     }
-    public selector: string;
-
-    draw(animate: number) {
-        if (!this.canvas) {
-            this.canvas = d3.select(this.selector).append("svg");
+    drawSelf(animate: number): void {
+        if (this.shape) {
+            this.shape.attr("width", this.size.width)
+                .attr("height", this.size.height);
         }
-        super.draw(animate);
-    }
-    drawSelf(canvas: ChartCanvas, animate: number): void {
-        this.canvas = canvas.attr("width", this.size.width)
-            .attr("height", this.size.height);
     }
 
 }
