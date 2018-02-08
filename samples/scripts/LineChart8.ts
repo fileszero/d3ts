@@ -76,7 +76,7 @@ namespace LineChart8 {
         const margin = new Layout.Margin({ top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 });
 
 
-        const chart = new LineChart<Date>(svg.size, margin);  //ZoomableLineChart
+        const chart = new ZoomableLineChart<Date>(svg.size, margin);  //ZoomableLineChart | LineChart
         svg.addParts(chart);
         chart.loadData(listData);
         svg.draw(500);

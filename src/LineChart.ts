@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, ChartDataParts, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
+import { Legend, Layout, LineSeriesData, PlotData, ChartDataParts, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
 import { util } from "./util";
 
 class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]> implements ScaleParts {
@@ -60,7 +60,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
 
     // 表示領域
     private plotArea: PlotArea<Tx>;
-    private xAxisArea: XAxisArea;
+    public xAxisArea: XAxisArea;
     // private xAxisArea: Selection<BaseType, {}, HTMLElement, any>;
     // private yAxisAreaLeft: Selection<BaseType, {}, HTMLElement, any>;
     // private yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
@@ -163,7 +163,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
 
         // 線を引くエリア
         this.plotArea = new PlotArea<Tx>();
-        this.plotArea.size = this.size.subMargin(chartMargin);
+        this.plotArea.size = this.size; //.subMargin(chartMargin);
         this.addParts(this.plotArea);
 
         // x軸

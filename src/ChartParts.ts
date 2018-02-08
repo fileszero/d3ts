@@ -94,9 +94,6 @@ export abstract class ChartDataParts<Tx> extends ChartPartsImpl implements Chart
 
     }
     clearData(): void {
-        if (this.shape) {
-            this.shape.remove();
-        }
         this.data = undefined;
     }
 }
