@@ -1,34 +1,35 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { ChartDataParts, Layout, ScaleParts, Scale } from ".";
+import { ChartDataParts, Layout, ScaleParts, Scale, ChartParts, Fill } from ".";
 import { util } from "./util";
 
+export interface AxisAttr extends Fill {
+    stroke: string | undefined;
+}
+
 export type AxisValueType = number | Date;
-export abstract class AxisArea extends ChartDataParts<AxisValueType[]> implements ScaleParts {
-    constructor(name: string, position: Layout.Position) {
+export abstract class AxisArea extends ChartDataParts<AxisValueType[]> {
+    constructor(position: Layout.Position) {
         super("g");
-        this.name = name;
         this.position = position;
     }
-    public name: string;
-    public xscale: Scale = new Scale();
-    public yscale: Scale = new Scale();
-    abstract get scale(): Scale;
+    public _scale: Scale = new Scale();
+    protected abstract range: number[];
+    get scale(): Scale {
+        this._scale.range = this.range   // [0, this.size.width];
+        if (this.data) this._scale.loadData(this.data);
+        return this._scale;
+    }
 
 
     public position: Layout.Position;  //default
     public positionOffset: number = 0;
+    public attr: AxisAttr = <AxisAttr>{};
 
     drawSelf(animate: number): void {
         if (!this.shape) throw "No shape";
         if (!this.data) throw "No data";
-
-        // scale実サイズ
-        this.xscale.range = [0, this.size.width];
-        this.yscale.range = [0, this.size.height];
-        this.xscale.loadData(this.data);
-        this.yscale.loadData(this.data);
 
         const axis_scale = this.scale.getD3Scale();
         if (!axis_scale) throw "No scale";
@@ -54,19 +55,46 @@ export abstract class AxisArea extends ChartDataParts<AxisValueType[]> implement
             this.shape.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }
 
-        this.shape.transition().duration(animate)
-            .call(<any>axis);
+        const anime = this.shape.transition().duration(animate);
+        util.applySvgAttr(anime, this.attr);
+        anime.call(<any>axis);
 
     }
 }
 
 
 export class XAxisArea extends AxisArea {
-    constructor(name: string, position?: Layout.Position) {
-        super(name, position || Layout.Position.Bottom);
+    constructor(position?: Layout.Position) {
+        super(position || Layout.Position.Bottom);
     }
-    get scale(): Scale {
-        return this.xscale;
+    protected get range(): number[] {
+        return [0, this.size.width];
+    }
+}
+
+export class YAxisArea extends AxisArea {
+    constructor(position?: Layout.Position) {
+        super(position || Layout.Position.Left);
+    }
+    protected get range(): number[] {
+        return [this.size.height, 0];
+    }
+}
+
+export class XYAxis implements ScaleParts {
+    constructor(name: string, x: XAxisArea, y: YAxisArea) {
+        this.xAxis = x;
+        this.yAxis = y;
+        this.name = name;
+    }
+    public name: string;
+    xAxis: XAxisArea;
+    yAxis: YAxisArea;
+    get xscale(): Scale | undefined {
+        return this.xAxis.scale;
+    }
+    get yscale(): Scale | undefined {
+        return this.yAxis.scale;
     }
 }
 

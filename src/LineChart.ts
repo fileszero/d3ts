@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, ChartDataParts, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea } from ".";
+import { Legend, Layout, LineSeriesData, PlotData, YAxisDef, XAxisDef, ChartDataParts, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
 import { util } from "./util";
 
 class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]> implements ScaleParts {
@@ -11,7 +11,7 @@ class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<T
 
     xscale: Scale = new Scale();
     yscale: Scale = new Scale();
-    private paths: Path<PlotData<Tx>>[] = [];
+    // private paths: Path<PlotData<Tx>>[] = [];
 
     drawSelf(animate: number): void {
         if (!this.shape) throw "No shape";
@@ -38,18 +38,18 @@ class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<T
             const ts = this.data[i];
             this.xscale.loadData(ts.xArray);
             this.yscale.loadData(ts.yArray);
-            if (this.paths.length <= i) {
-                let path = new Path<PlotData<Tx>>((d) => d.x, (d) => d.y);
-                this.paths.push(path);
-                this.addParts(path);
-            }
-            this.paths[i].loadData(ts.data);
-            this.paths[i].scale = this;
-            this.paths[i].attr.stroke = "red";
+            // if (this.paths.length <= i) {
+            //     let path = new Path<PlotData<Tx>>((d) => d.x, (d) => d.y);
+            //     this.paths.push(path);
+            //     this.addParts(path);
+            // }
+            // this.paths[i].loadData(ts.data);
+            // this.paths[i].scale = this;
+            // this.paths[i].attr.stroke = "red";
         }
-        if (this.paths.length > this.data.length) {
-            this.paths.splice(this.data.length - 1);
-        }
+        // if (this.paths.length > this.data.length) {
+        //     this.paths.splice(this.data.length - 1);
+        // }
     }
 
 }
@@ -66,19 +66,86 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
     // private yAxisAreaRight: Selection<BaseType, {}, HTMLElement, any>;
     // // 軸
     // public xAxis: XAxisDef;
-    private yAxisDefs: YAxisDef[] = [];
+    private AxisDefs: XYAxis[] = [];
+
+    // 系列
+    private paths: Path<PlotData<Tx>>[] = [];
 
     // 凡例
     // private Legend: Legend;
     protected colors: d3.ScaleOrdinal<string, string>;
 
+    /** 軸を作成 */
+    private ensureAxis(): void {
+        if (!this.data) return;
+        for (const ts of this.data) {    //軸毎の処理
+            this.xAxisArea.loadData(<(number | Date)[]>ts.xArray);
+            let axis = this.AxisDefs.filter((ax) => ax.name === ts.name)[0];
+            if (!axis) {    // new !
+                const yaxis = new YAxisArea();
+                yaxis.size.height = this.plotArea.size.height;
+                this.addParts(yaxis);
+                axis = new XYAxis(ts.name, this.xAxisArea, yaxis);
+                if (this.AxisDefs.length == 0) {
+                    yaxis.position = Layout.Position.Left;
+                } else {
+                    yaxis.position = Layout.Position.Right;
+                    yaxis.margin.left = this.plotArea.size.width + ((this.AxisDefs.length - 1) * 40);
+                }
+                this.AxisDefs.push(axis);
+                yaxis.attr.stroke = this.colors(this.AxisDefs.length.toString());
+            }
+            axis.yAxis.loadData(<(number | Date)[]>ts.yArray);
+        }
+    }
+
+    private ensurePath(): void {
+        if (!this.data) return;
+        let i: number;
+        for (i = 0; i < this.data.length; i++) {
+            const ts = this.data[i];
+            if (this.paths.length <= i) {
+                let path = new Path<PlotData<Tx>>((d) => d.x, (d) => d.y);
+                this.paths.push(path);
+                this.plotArea.addParts(path);   // 描画設定
+            }
+            this.paths[i].loadData(ts.data);
+            const axis = this.AxisDefs.filter((ax) => ax.name === ts.name)[0];
+
+            this.paths[i].scale = axis;
+            this.paths[i].attr.stroke = this.colors(i.toString());
+        }
+        if (this.paths.length > this.data.length) {
+            this.paths.splice(this.data.length - 1);
+        }
+    }
     loadData(data: LineSeriesData<Tx>[]) {
         super.loadData(data);
         this.plotArea.loadData(data);
-        for (const ts of data) {
-            this.xAxisArea.loadData(<(number | Date)[]>ts.xArray);
-        }
+        this.ensureAxis();
+        this.ensurePath();
     }
+    //         let yaxis = this.yAxisDefs.filter((ax) => ax.name === axis_key)[0];
+    //         if (!yaxis) {   //初回
+    //             const axis_idx = axis_keys.indexOf(axis_key)
+    //             if (axis_idx == 0) {
+    //                 yaxis = new YAxisDef(this.yAxisAreaLeft, axis_key)
+    //             } else {
+    //                 yaxis = new YAxisDef(this.yAxisAreaRight, axis_key)
+    //                 yaxis.position = AxisPosition.Right;
+    //                 yaxis.positionOffset = (axis_idx - 1) * 20;
+    //             }
+    //             yaxis.size.width = 20;
+    //             yaxis.size.height = this.size.height;
+    //             yaxis.color = this.colors(axis_idx.toString())
+    //             this.yAxisDefs.push(yaxis);
+    //         }
+    //         //domain 評価
+    //         const ydatas = data.filter((d) => d.yAxis === axis_key);
+    //         for (const ydata of ydatas) {
+    //             yaxis.loadData(ydata.yArray);
+    //         }
+
     drawSelf(animate: number = 500) {
         if (!this.shape) throw "No shape";
 
@@ -100,7 +167,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
         this.addParts(this.plotArea);
 
         // x軸
-        this.xAxisArea = new XAxisArea("default");
+        this.xAxisArea = new XAxisArea();
         this.xAxisArea.size.width = this.plotArea.size.width;
         this.xAxisArea.margin.top = this.plotArea.size.height;
         this.addParts(this.xAxisArea);
