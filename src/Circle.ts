@@ -1,4 +1,4 @@
-import { ChartPartsImpl, ChartParts, ChartCanvas, ChartDataParts, Fill } from ".";
+import { ChartPartsImpl, ChartParts, ChartCanvas, ChartDataPartsImpl, Fill } from ".";
 import { util } from "./util";
 
 export interface CircleAttr extends Fill {
@@ -7,7 +7,7 @@ export interface CircleAttr extends Fill {
     cy: number,
     r: number
 }
-export class Circle extends ChartDataParts<CircleAttr> {
+export class Circle extends ChartDataPartsImpl<CircleAttr> {
     constructor() {
         super("circle");
         this.data = <CircleAttr>{ cx: 0, cy: 0, r: 0 };

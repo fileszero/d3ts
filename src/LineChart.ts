@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
-import { Legend, Layout, LineSeriesData, PlotData, ChartDataParts, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
+import { Legend, Layout, LineSeriesData, PlotData, ChartDataPartsImpl, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
 import { util } from "./util";
 
-class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]>  {
+class PlotArea<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>[]>  {
     constructor() {
         super("g");
     }
@@ -31,7 +31,7 @@ class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<T
     }
 
 }
-export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]>{
+export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>[]>{
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */
@@ -102,8 +102,8 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
         }
     }
     loadData(data: LineSeriesData<Tx>[], reset?: boolean | undefined) {
-        super.loadData(data, reset);
-        this.plotArea.loadData(data, reset);
+        super.loadData(data);
+        this.plotArea.loadData(data);
         this.ensureAxis();
         this.ensurePath();
     }

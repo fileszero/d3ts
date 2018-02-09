@@ -1,4 +1,4 @@
-import { ChartPartsImpl, ChartParts, ChartCanvas, ChartDataParts, Fill, SvgAttr, Scale, ScaleParts } from ".";
+import { ChartPartsImpl, ChartParts, ChartCanvas, ChartDataPartsImpl, Fill, SvgAttr, Scale, ScaleParts } from ".";
 import d3 = require("d3");
 import { BaseType, Line } from "d3";
 import { util } from "./util";
@@ -7,7 +7,7 @@ export interface PathAttr extends Fill {
     stroke: string | undefined;
 }
 export type PathValue = number | Date;
-export class Path<Tx> extends ChartDataParts<Tx[]> {
+export class Path<Tx> extends ChartDataPartsImpl<Tx[]> {
     constructor(x?: (d: Tx, i: number, arr: Tx[]) => (PathValue | undefined), y?: (d: Tx, i: number, arr: Tx[]) => (PathValue | undefined)) {
         super("path");
         this.xf = x;

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { ChartDataParts, Layout, ScaleParts, Scale, ChartParts, Fill, ChartCanvas } from ".";
+import { ChartDataPartsImpl, Layout, ScaleParts, Scale, ChartParts, Fill, ChartCanvas } from ".";
 import { util } from "./util";
 
 export interface AxisAttr extends Fill {
@@ -9,7 +9,7 @@ export interface AxisAttr extends Fill {
 }
 
 export type AxisValueType = number | Date;
-export abstract class AxisArea extends ChartDataParts<AxisValueType[]> {
+export abstract class AxisArea extends ChartDataPartsImpl<AxisValueType[]> {
     constructor(position: Layout.Position) {
         super("g");
         this.position = position;
@@ -30,9 +30,13 @@ export abstract class AxisArea extends ChartDataParts<AxisValueType[]> {
         return this._scale;
     }
 
-    loadData(data: AxisValueType[], reset?: boolean | undefined) {
-        super.loadData(data, reset);
-        this._scale.loadData(data, reset);
+    loadData(data: AxisValueType[]) {
+        super.loadData(data);
+        this._scale.loadData(data);
+    }
+    clearData() {
+        super.clearData();
+        this._scale.clearData();
     }
     public position: Layout.Position;  //default
     public positionOffset: number = 0;
@@ -76,7 +80,8 @@ export abstract class AxisArea extends ChartDataParts<AxisValueType[]> {
         if (scale) {
             range = range || this.defaultRange();
             const newXDomain = range.map((r) => scale.invert(r));
-            this.loadData(newXDomain, true);
+            this._scale.clearData();
+            this.loadData(newXDomain);
             return range;
         }
         return [];

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, TransitionLike } from "d3";
 import { Selection } from "d3-selection";
-import { ChartDataParts, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas } from "."
+import { ChartDataPartsImpl, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas } from "."
 
 class RangeSelecter extends ChartPartsImpl {
     constructor(onRangeChanged: () => void) {
@@ -66,7 +66,7 @@ class ZoomLayer extends ChartPartsImpl {
         this.zoom.transform(<any>this.shape, trans)
     }
 }
-export class ZoomableLineChart<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]>{
+export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>[]>{
     protected main: LineChart<Tx>;
     protected sub: LineChart<Tx>;
     private xrange: RangeSelecter;
@@ -117,7 +117,8 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataParts<
         console.log("zoomed");
         var t = d3.event.transform;
         var newData = t.rescaleX(this.sub.xAxisArea.scale.getD3Scale()).domain();
-        this.main.xAxisArea.loadData(newData, true);
+        this.main.xAxisArea.clearData();
+        this.main.xAxisArea.loadData(newData);
         this.main.draw(10);
         const scale = this.main.xAxisArea.scale.getD3Scale();
         if (scale) {

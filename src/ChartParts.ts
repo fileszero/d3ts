@@ -62,7 +62,7 @@ export abstract class ChartPartsImpl implements ChartParts {
         return this._shape;
     }
 
-    private parts: ChartParts[] = [];
+    protected parts: ChartParts[] = [];
     append(tag: string | ChartParts): any {
         if (typeof tag === "string") {
             if (!this.shape) throw "no shape";
@@ -114,15 +114,26 @@ export abstract class ChartPartsImpl implements ChartParts {
 
 }
 
-export abstract class ChartDataParts<Tx> extends ChartPartsImpl implements ChartParts {
+export interface ChartDataParts<Tx> {
+    loadData(data: Tx): void;
+    clearData(): void;
+    hasData: boolean;
+}
+function IsChartDataPartsImpl<Tx>(part: any): part is ChartDataPartsImpl<Tx> {
+    return (<ChartDataParts<Tx>>part).clearData !== undefined;
+}
+export abstract class ChartDataPartsImpl<Tx> extends ChartPartsImpl implements ChartParts, ChartDataParts<Tx> {
     protected data: Tx | undefined;
-    loadData(data: Tx, reset?: boolean | undefined): void {
-        if (reset) this.clearData();
+    loadData(data: Tx): void {
         this.data = data;
-
     }
     clearData(): void {
         this.data = undefined;
+        for (const part of this.parts) {
+            if (IsChartDataPartsImpl<Tx>(part)) {
+                part.clearData();
+            }
+        }
     }
     get hasData(): boolean {
         return this.data !== undefined;
