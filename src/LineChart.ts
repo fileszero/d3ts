@@ -4,52 +4,30 @@ import { Selection } from "d3-selection";
 import { Legend, Layout, LineSeriesData, PlotData, ChartDataParts, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
 import { util } from "./util";
 
-class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]> implements ScaleParts {
+class PlotArea<Tx extends number | Date> extends ChartDataParts<LineSeriesData<Tx>[]>  {
     constructor() {
         super("g");
     }
 
-    xscale: Scale = new Scale();
-    yscale: Scale = new Scale();
     // private paths: Path<PlotData<Tx>>[] = [];
-
-    drawSelf(animate: number): void {
-        if (!this.shape) throw "No shape";
+    private _clip: ChartCanvas | undefined;
+    drawSelf(canvas: ChartCanvas, animate: number): void {
         if (!this.data) throw "No data";
         // 線を引くエリア
         const clip_id = this.id + "-clip";
-        this.shape
+        canvas
             .attr("clip-path", "url(#" + clip_id + ")")
             .attr("class", "plotArea");
-
-        this.shape.append("clipPath")  // プロットエリアからはみ出さないようにする
-            .attr("id", clip_id)
-            .append("rect")
+        if (!this._clip) {
+            this._clip = canvas.append("clipPath")  // プロットエリアからはみ出さないようにする
+                .attr("id", clip_id)
+                .append("rect");
+        }
+        this._clip
             .attr("width", this.size.width)
             .attr("height", this.size.height);
 
-        // scale実サイズ
-        this.xscale.range = [0, this.size.width];
-        this.yscale.range = [0, this.size.height];
-
-        const anime = this.shape.transition().duration(animate);
-        let i;
-        for (i = 0; i < this.data.length; i++) {
-            const ts = this.data[i];
-            this.xscale.loadData(ts.xArray);
-            this.yscale.loadData(ts.yArray);
-            // if (this.paths.length <= i) {
-            //     let path = new Path<PlotData<Tx>>((d) => d.x, (d) => d.y);
-            //     this.paths.push(path);
-            //     this.addParts(path);
-            // }
-            // this.paths[i].loadData(ts.data);
-            // this.paths[i].scale = this;
-            // this.paths[i].attr.stroke = "red";
-        }
-        // if (this.paths.length > this.data.length) {
-        //     this.paths.splice(this.data.length - 1);
-        // }
+        const anime = canvas.transition().duration(animate);
     }
 
 }
@@ -79,12 +57,11 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
     private ensureAxis(): void {
         if (!this.data) return;
         for (const ts of this.data) {    //軸毎の処理
-            this.xAxisArea.loadData(<(number | Date)[]>ts.xArray);
             let axis = this.AxisDefs.filter((ax) => ax.name === ts.name)[0];
             if (!axis) {    // new !
                 const yaxis = new YAxisArea();
                 yaxis.size.height = this.plotArea.size.height;
-                this.addParts(yaxis);
+                this.append(yaxis);
                 axis = new XYAxis(ts.name, this.xAxisArea, yaxis);
                 if (this.AxisDefs.length == 0) {
                     yaxis.position = Layout.Position.Left;
@@ -95,6 +72,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
                 this.AxisDefs.push(axis);
                 yaxis.attr.stroke = this.colors(this.AxisDefs.length.toString());
             }
+            axis.xAxis.loadData(<(number | Date)[]>ts.xArray);
             axis.yAxis.loadData(<(number | Date)[]>ts.yArray);
         }
     }
@@ -102,12 +80,13 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
     private ensurePath(): void {
         if (!this.data) return;
         let i: number;
+        this.paths.forEach((p) => p.clearData());
         for (i = 0; i < this.data.length; i++) {
             const ts = this.data[i];
             if (this.paths.length <= i) {
                 let path = new Path<PlotData<Tx>>((d) => d.x, (d) => d.y);
                 this.paths.push(path);
-                this.plotArea.addParts(path);   // 描画設定
+                this.plotArea.append(path);   // 描画設定
             }
             this.paths[i].loadData(ts.data);
             const axis = this.AxisDefs.filter((ax) => ax.name === ts.name)[0];
@@ -115,13 +94,16 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
             this.paths[i].scale = axis;
             this.paths[i].attr.stroke = this.colors(i.toString());
         }
+        this.paths.forEach((p) => {
+            if (!p.hasData) p.remove();
+        });
         if (this.paths.length > this.data.length) {
             this.paths.splice(this.data.length - 1);
         }
     }
-    loadData(data: LineSeriesData<Tx>[]) {
-        super.loadData(data);
-        this.plotArea.loadData(data);
+    loadData(data: LineSeriesData<Tx>[], reset?: boolean | undefined) {
+        super.loadData(data, reset);
+        this.plotArea.loadData(data, reset);
         this.ensureAxis();
         this.ensurePath();
     }
@@ -146,12 +128,10 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
     //             yaxis.loadData(ydata.yArray);
     //         }
 
-    drawSelf(animate: number = 500) {
-        if (!this.shape) throw "No shape";
-
-        this.shape
+    drawSelf(canvas: ChartCanvas, animate: number = 500) {
+        canvas
             .attr("class", "chart");
-        const anime = this.shape.transition().duration(animate);
+        const anime = canvas.transition().duration(animate);
     }
 
     constructor(size: Layout.Size, chartMargin: Layout.Margin) {
@@ -164,13 +144,13 @@ export class LineChart<Tx extends number | Date> extends ChartDataParts<LineSeri
         // 線を引くエリア
         this.plotArea = new PlotArea<Tx>();
         this.plotArea.size = this.size; //.subMargin(chartMargin);
-        this.addParts(this.plotArea);
+        this.append(this.plotArea);
 
         // x軸
         this.xAxisArea = new XAxisArea();
         this.xAxisArea.size.width = this.plotArea.size.width;
         this.xAxisArea.margin.top = this.plotArea.size.height;
-        this.addParts(this.xAxisArea);
+        this.append(this.xAxisArea);
         // // Add the X Axis Area and Axis
         // this.xAxisArea = this.canvas.append("g")
         //     .attr("class", "axis axis--x")

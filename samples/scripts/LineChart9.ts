@@ -19,12 +19,12 @@ namespace LineChart9 {
     for (let i = 0; i < 10; i++) {
         const circle = new Circle();
         circles.push(circle);
-        svg.addParts(circle);
+        svg.append(circle);
 
         const path = new Path<PlotData<number>>((d) => d.x || 0, (d) => d.y || 0);
         paths.push(path);
         path.attr.stroke = color(i + "");
-        svg.addParts(path);
+        svg.append(path);
     }
 
     let loops = 0;

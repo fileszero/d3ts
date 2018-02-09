@@ -12,9 +12,9 @@ export class Circle extends ChartDataParts<CircleAttr> {
         super("circle");
         this.data = <CircleAttr>{ cx: 0, cy: 0, r: 0 };
     }
-    drawSelf(animate: number): void {
-        if (this.shape && this.data) {
-            const anime = this.shape.transition().duration(animate);
+    drawSelf(canvas: ChartCanvas, animate: number): void {
+        if (this.data) {
+            const anime = canvas.transition().duration(animate);
             util.applySvgAttr(anime, this.data);
         }
     }

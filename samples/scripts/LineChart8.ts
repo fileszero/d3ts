@@ -77,7 +77,7 @@ namespace LineChart8 {
 
 
         const chart = new ZoomableLineChart<Date>(svg.size, margin);  //ZoomableLineChart | LineChart
-        svg.addParts(chart);
+        svg.append(chart);
         chart.loadData(listData);
         svg.draw(500);
         return chart;

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, TransitionLike } from "d3";
 import { Selection } from "d3-selection";
-import { ChartDataParts, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart } from "."
+import { ChartDataParts, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas } from "."
 
 class RangeSelecter extends ChartPartsImpl {
     constructor(onRangeChanged: () => void) {
@@ -13,12 +13,11 @@ class RangeSelecter extends ChartPartsImpl {
     protected onRangeChanged: () => void;
 
     private brush: d3.BrushBehavior<{}>;
-    protected drawSelf(animate: number): void {
-        if (!this.shape) throw "No shape";
+    protected drawSelf(canvas: ChartCanvas, animate: number): void {
         this.brush = this.brush
             .extent([[0, 0], [this.size.width, this.size.height]])
             .on("brush end", this.onRangeChanged);
-        this.shape
+        canvas
             .attr("class", "brush")
             .call(<any>this.brush);
     }
@@ -48,12 +47,11 @@ class ZoomLayer extends ChartPartsImpl {
     }
     protected onZoomed: () => void;
     private zoom: d3.ZoomBehavior<Element, {}>;
-    protected drawSelf(animate: number): void {
-        if (!this.shape) throw "No shape";
+    protected drawSelf(canvas: ChartCanvas, animate: number): void {
         this.zoom.translateExtent([[0, 0], [this.size.width, this.size.height]])
             .extent([[0, 0], [this.size.width, this.size.height]])
             .on("zoom", this.onZoomed);
-        this.shape
+        canvas
             .attr("class", "zoom")
             .attr("width", this.size.width)
             .attr("height", this.size.height)
@@ -79,22 +77,22 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataParts<
         const subMargin = new Layout.Margin({ top: size.height - 100, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom });
         const main = new LineChart<Tx>(size.subMargin(mainMargin), mainMargin);
         this.main = main;
-        this.addParts(main);
+        this.append(main);
 
         const sub = new LineChart<Tx>(size.subMargin(subMargin), subMargin);
         this.sub = sub;
-        this.addParts(sub);
+        this.append(sub);
         //return;
         /// サブチャートに範囲選択UIを追加
         this.xrange = new RangeSelecter(() => this.brushed());
         this.xrange.size = this.sub.size;
         this.xrange.margin = this.sub.margin;
-        this.addParts(this.xrange);
+        this.append(this.xrange);
 
         this.zoom = new ZoomLayer(() => this.zoomed());
         this.zoom.size = this.main.size;
         this.zoom.margin = this.zoom.margin;
-        this.addParts(this.zoom);
+        this.append(this.zoom);
 
         // var zoom = d3.zoom()
         //     .scaleExtent([1, Infinity])
@@ -133,8 +131,7 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataParts<
         this.sub.loadData(data);
     }
 
-    drawSelf(animate: number = 500) {
-        if (!this.shape) throw "No shape";
-        const anime = this.shape.transition().duration(animate);
+    drawSelf(canvas: ChartCanvas, animate: number = 500) {
+        const anime = canvas.transition().duration(animate);
     }
 }

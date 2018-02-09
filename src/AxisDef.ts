@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, min, AxisScale, Axis } from "d3";
-import { ChartDataParts, Layout, ScaleParts, Scale, ChartParts, Fill } from ".";
+import { ChartDataParts, Layout, ScaleParts, Scale, ChartParts, Fill, ChartCanvas } from ".";
 import { util } from "./util";
 
 export interface AxisAttr extends Fill {
@@ -38,8 +38,7 @@ export abstract class AxisArea extends ChartDataParts<AxisValueType[]> {
     public positionOffset: number = 0;
     public attr: AxisAttr = <AxisAttr>{};
 
-    drawSelf(animate: number): void {
-        if (!this.shape) throw "No shape";
+    drawSelf(canvas: ChartCanvas, animate: number): void {
         if (!this.data) throw "No data";
 
         const axis_scale = this.scale.getD3Scale();
@@ -63,10 +62,10 @@ export abstract class AxisArea extends ChartDataParts<AxisValueType[]> {
 
         const axis = axisFunc(axis_scale);
         if (x_offset != 0 || y_offset != 0) {
-            this.shape.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
+            canvas.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }
 
-        const anime = this.shape.transition().duration(animate);
+        const anime = canvas.transition().duration(animate);
         util.applySvgAttr(anime, this.attr);
         anime.call(<any>axis);
 

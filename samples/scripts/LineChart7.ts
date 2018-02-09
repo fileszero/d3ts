@@ -4,13 +4,13 @@ import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime } from "d3";
 import { Selection } from "d3-selection";
 import { getSeconds } from "date-fns";
 
-import { Layout, LineSeriesData, PlotData, ZoomableLineChart } from "../../src";
+import { Layout, LineSeriesData, PlotData, ZoomableLineChart, Svg } from "../../src";
 
 namespace LineChart7 {
     d3.select("body").append("p")
         .text("Zoom and Brush in d3 https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172");
 
-    function createData(Name: string, date: Date): LineSeriesData<Date> {
+    function createData(Name: string, date: Date, scale: number = 1): LineSeriesData<Date> {
         // 時系列データ作成
         const today = df.startOfDay(date);
         const listData = new LineSeriesData<Date>();
@@ -21,7 +21,7 @@ namespace LineChart7 {
             listData.data.push(rec);
             y += (Math.random() - 0.5);
             rec.x = time;
-            rec.y = y;
+            rec.y = y * scale;
         }
         listData.yAxis = Name;
         return listData;
@@ -42,17 +42,21 @@ namespace LineChart7 {
 
 
         // Adds the svg canvas
-        const svg = d3.select("body")
-            .append("svg")
-            .attr("width", svgSize.width)
-            .attr("height", svgSize.height);
+        const svg = new Svg("#chart", svgSize);
+
+        // const svg = d3.select("body")
+        //     .append("svg")
+        //     .attr("width", svgSize.width)
+        //     .attr("height", svgSize.height);
 
         // Setting up Margins
         const yaxis_width = 20 * listData.length; //Y軸メモリ分確保
         const margin = new Layout.Margin({ top: 10, right: 10 + yaxis_width, left: 70, bottom: 40 });
 
-        const chart = new ZoomableLineChart<Date>(svg, margin);
-        chart.LoadData(listData);
+        const chart = new ZoomableLineChart<Date>(svg.size, margin);
+        svg.append(chart);
+        chart.loadData(listData);
+        svg.draw();
         return chart;
 
     }
@@ -60,18 +64,20 @@ namespace LineChart7 {
     setTimeout(() => {
         const listData: LineSeriesData<Date>[] = [];
         for (let i = 0; i < 3; i++) {
-            listData.push(createData("Rec2nd" + i, new Date()));
-            listData.push(createData("Rec2nd" + i, df.addDays(new Date(), 1)));
+            listData.push(createData("Rec" + i, new Date(), 10));
+            listData.push(createData("Rec" + i, df.addDays(new Date(), 1), 2));
         }
-        chart.LoadData(listData);
-    }, 3000);
+        chart.loadData(listData);
+        chart.draw();
+    }, 2000);
 
     setTimeout(() => {
         const listData: LineSeriesData<Date>[] = [];
         for (let i = 0; i < 5; i++) {
-            listData.push(createData("Rec2nd" + i, new Date()));
+            listData.push(createData("Rec" + i, new Date(), 3));
         }
-        chart.LoadData(listData);
-    }, 6000);
+        chart.loadData(listData);
+        chart.draw();
+    }, 4000);
 
 }

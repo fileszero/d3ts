@@ -8,11 +8,9 @@ export class Svg extends ChartPartsImpl {
             this.size.set(size);
         }
     }
-    drawSelf(animate: number): void {
-        if (this.shape) {
-            this.shape.attr("width", this.size.width)
-                .attr("height", this.size.height);
-        }
+    drawSelf(canvas: ChartCanvas, animate: number): void {
+        canvas.attr("width", this.size.width)
+            .attr("height", this.size.height);
     }
 
 }

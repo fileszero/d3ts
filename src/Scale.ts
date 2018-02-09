@@ -49,11 +49,11 @@ export class Scale {
         if (this.max && this.min) {
             if (util.isDate(this.max)) {
                 this.mScale = d3.scaleTime().range(this.range);    // Yの描画範囲
-                this.mScale.domain([this.min, this.max]);
+                this.mScale = this.mScale.domain([this.min, this.max]);
             }
             if (util.isNumber(this.max)) {
                 this.mScale = d3.scaleLinear().range(this.range);    // Yの描画範囲
-                this.mScale.domain([this.min, this.max]);
+                this.mScale = this.mScale.domain([this.min, this.max]);
             }
         }
     }
