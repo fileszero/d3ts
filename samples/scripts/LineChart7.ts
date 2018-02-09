@@ -57,6 +57,7 @@ namespace LineChart7 {
         const chart = new ZoomableLineChart<Date>(svg.size, margin);
         svg.append(chart);
         chart.loadData(listData);
+        chart.option.LegendPos = Layout.Position.Bottom;
         svg.draw();
         return chart;
 
@@ -69,6 +70,7 @@ namespace LineChart7 {
             listData.push(createData("Rec" + i, df.addDays(new Date(), 1), 2));
         }
         chart.loadData(listData);
+        chart.option.LegendPos = undefined;
         chart.draw();
     }, 2000);
 
@@ -78,6 +80,7 @@ namespace LineChart7 {
             listData.push(createData("Rec" + i, new Date(), 3));
         }
         chart.loadData(listData);
+        chart.option.LegendPos = Layout.Position.Bottom;
         chart.draw();
     }, 4000);
 

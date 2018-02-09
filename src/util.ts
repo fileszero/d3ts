@@ -1,4 +1,4 @@
-import { ChartCanvas, SvgAttr, ChartTransition } from ".";
+import { ChartCanvas, SvgAttr, ChartTransition, SvgEvent } from ".";
 
 export namespace util {
     export function id(): string {
@@ -21,4 +21,17 @@ export namespace util {
         }
         return result;
     }
+    export function applySvgEvent(canvas: ChartCanvas | ChartTransition, svgEvent: SvgEvent): ChartCanvas | ChartTransition {
+        let result = canvas;
+        for (let event in svgEvent) {
+            const val = svgEvent[event];
+            if (val) {
+                let event_name = event.replace('_', '-').replace(/^on/, '');
+
+                result = result.on(event_name, val);
+            }
+        }
+        return result;
+    }
+
 }

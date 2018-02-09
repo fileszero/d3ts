@@ -5,6 +5,7 @@ import { util } from "./util";
 
 export interface PathAttr extends Fill {
     stroke: string | undefined;
+    stroke_width: number | undefined;
 }
 export type PathValue = number | Date;
 export class Path<Tx> extends ChartDataPartsImpl<Tx> {
@@ -43,6 +44,7 @@ export class Path<Tx> extends ChartDataPartsImpl<Tx> {
         return 0;
     }
 
+    public show: boolean = true;
     drawSelf(canvas: ChartCanvas, animate: number): void {
         // https://qiita.com/daxanya1/items/734e65a7ca58bbe2a98c#6%E7%B7%9A%E3%82%92%E5%BC%95%E3%81%93%E3%81%86path%E3%81%AE%E4%BD%BF%E3%81%84%E6%96%B9
         if (!this.xf) throw "No x function";
@@ -60,7 +62,7 @@ export class Path<Tx> extends ChartDataPartsImpl<Tx> {
 
         const anime = canvas.transition().duration(animate);
         util.applySvgAttr(anime, this.attr);
-
+        anime.style("opacity", this.show ? 1 : 0);
         anime.attr("d", generator(this.data) || "");
     }
 

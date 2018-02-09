@@ -1,4 +1,4 @@
-import { ChartDataPartsImpl, Fill, ChartCanvas } from ".";
+import { ChartDataPartsImpl, Fill, ChartCanvas, PartsEvent } from ".";
 import { util } from "./util";
 import d3 = require("d3");
 
@@ -18,8 +18,10 @@ export class Text extends ChartDataPartsImpl<string> {
         super("text");
     }
     public attr: TextAttr = <TextAttr>{};
-
+    public event: PartsEvent = <PartsEvent>{};
     drawSelf(canvas: ChartCanvas, animate: number): void {
+        util.applySvgEvent(canvas, this.event);
+
         let txt = "";
         if (this.data) {
             txt = this.data.join("\n");

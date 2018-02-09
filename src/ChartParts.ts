@@ -14,6 +14,8 @@ export interface ChartParts {
     size: Layout.Size;
     margin: Layout.Margin;
     parent: ChartParts | undefined;
+    shape: ChartCanvas | undefined;
+    visible: boolean;
     draw(animate: number): void;
     //append(tag: string): ChartCanvas;
     append(tag: string): ChartCanvas;
@@ -37,6 +39,8 @@ export abstract class ChartPartsImpl implements ChartParts {
     }
     public id: string;
     parent: ChartParts | undefined;
+    visible: boolean = true;
+
     // サイズ
     private _size: Layout.Size;
     get size() { return this._size; }
@@ -55,9 +59,9 @@ export abstract class ChartPartsImpl implements ChartParts {
     /** パーツ本体 */
     private _shapeTag: string;
     private _shape: ChartCanvas | undefined;
-    protected get shape(): ChartCanvas | undefined {
+    public get shape(): ChartCanvas | undefined {
         if (this._shape) return this._shape;
-        if (!this.parent) throw "No parent";
+        if (!this.parent) return undefined;
         this._shape = this.parent.append(this._shapeTag).attr("id", this.id);
         return this._shape;
     }
@@ -76,10 +80,16 @@ export abstract class ChartPartsImpl implements ChartParts {
     }
     draw(animate: number = 500): void {
         if (this.shape) {
+            const anime = this.shape.transition().duration(animate);
+            if (!this.visible) {
+                anime.style("opacity", 0)
+                return;
+            }
+            anime.style("opacity", 1)
             this.drawSelf(this.shape, animate);
-        }
-        if (this.shape && (this.margin.left != 0 || this.margin.top != 0)) {
-            this.shape.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+            if ((this.margin.left != 0 || this.margin.top != 0)) {
+                this.shape.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
+            }
         }
         this.drawChild(animate);
     }
@@ -139,6 +149,8 @@ export abstract class ChartDataPartsImpl<Tx> extends ChartPartsImpl implements C
         return this.data !== undefined;
     }
 
+    public for: string | undefined; // ラベルとかでリンク先記録ように使用
+
     ensureParts<PT extends ChartDataParts<any> & ChartParts>(parts: PT[], newFunc: () => PT, setup: (part: PT, data: Tx, idx: number) => void, parent?: ChartParts) {
         if (!this.data) return;
         parts.forEach((p) => p.clearData());
@@ -159,7 +171,7 @@ export abstract class ChartDataPartsImpl<Tx> extends ChartPartsImpl implements C
             if (!p.hasData) p.remove();
         });
         if (parts.length > this.data.length) {
-            parts.splice(this.data.length - 1);
+            parts.splice(this.data.length);
         }
 
     }

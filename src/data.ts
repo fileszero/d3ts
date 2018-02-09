@@ -1,3 +1,5 @@
+import { util } from "./util";
+
 export class PlotData<Tx extends number | Date>{
     public x: Tx | undefined;
     public y: number | undefined;
@@ -10,6 +12,9 @@ export interface SeriesData {
 }
 
 export class LineSeriesData<Tx extends number | Date> implements SeriesData {
+    constructor() {
+        this.id = util.id();
+    }
     public name: string = "default";
     public id: string = "";
     public yAxis: string = "default";

@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, TransitionLike } from "d3";
 import { Selection } from "d3-selection";
-import { ChartDataPartsImpl, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas } from "."
+import { ChartDataPartsImpl, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas, LineChartOption } from "."
 
 class RangeSelecter extends ChartPartsImpl {
     constructor(onRangeChanged: () => void) {
@@ -25,16 +25,6 @@ class RangeSelecter extends ChartPartsImpl {
         this.brush.move(<any>this.shape, domain);
         // RangeSelecterUI.call(<any>brush.move, main.xAxisArea.scale.getD3Scale().range().map(t.invertX, t));
     }
-    // var brush = d3.brushX()
-    //     .extent([[0, 0], [this.sub.size.width, this.sub.size.height]])
-    //     .on("brush end", brushed);
-
-    // const RangeSelecterUI = this.sub.canvas.append("g")
-    //     .attr("class", "brush")
-    //     .call(<any>brush)
-    //     //.call(<any>brush.move, main.xScale.range());  //全範囲選択
-    //     ;
-
 }
 
 class ZoomLayer extends ChartPartsImpl {
@@ -71,6 +61,13 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsI
     protected sub: LineChart<Tx>;
     private xrange: RangeSelecter;
     private zoom: ZoomLayer;
+    public set option(opt: LineChartOption) {
+        this.main.option = opt;
+    }
+    public get option(): LineChartOption {
+        return this.main.option;
+    }
+
     constructor(size: Layout.Size, chartMargin: Layout.Margin) {
         super("g");
         const mainMargin = new Layout.Margin({ top: chartMargin.top, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom + 100 });
@@ -86,13 +83,11 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsI
         /// サブチャートに範囲選択UIを追加
         this.xrange = new RangeSelecter(() => this.brushed());
         this.xrange.size = this.sub.size;
-        this.xrange.margin = this.sub.margin;
-        this.append(this.xrange);
+        this.sub.plotArea.append(this.xrange);
 
         this.zoom = new ZoomLayer(() => this.zoomed());
         this.zoom.size = this.main.size;
-        this.zoom.margin = this.zoom.margin;
-        this.append(this.zoom);
+        this.main.plotArea.append(this.zoom);
 
         // var zoom = d3.zoom()
         //     .scaleExtent([1, Infinity])

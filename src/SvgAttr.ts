@@ -11,3 +11,32 @@ export interface Fill extends SvgAttr {
     fillRule: string | undefined;
 }
 
+export type SvgEventHandler = ValueFn<BaseType, {}, void> | undefined;  // (data,index,group);
+export interface SvgEvent {
+    [key: string]: SvgEventHandler;  // シグネチャー    for loop []で必要
+    // onactivate, onclick, onfocusin, onfocusout, onload, onmousedown, onmousemove, onmouseout, onmouseover, onmouseup
+}
+
+export interface GraphicalEvent extends SvgEvent {
+    onactivate: SvgEventHandler;
+    onclick: SvgEventHandler;
+    onfocusin: SvgEventHandler;
+    onfocusout: SvgEventHandler;
+    onload: SvgEventHandler;
+    onmousedown: SvgEventHandler;
+    onmousemove: SvgEventHandler;
+    onmouseout: SvgEventHandler;
+    onmouseover: SvgEventHandler;
+    onmouseup: SvgEventHandler;
+}
+export interface DocumentEvent extends SvgEvent {
+    onabort: SvgEventHandler;
+    onerror: SvgEventHandler;
+    onresize: SvgEventHandler;
+    onscroll: SvgEventHandler;
+    onunload: SvgEventHandler;
+}
+
+export interface PartsEvent extends GraphicalEvent, DocumentEvent {
+
+}
