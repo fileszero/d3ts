@@ -11,12 +11,14 @@ export namespace util {
         return (<number>val).toPrecision !== undefined;
     }
 
-    export function applySvgAttr(canvas: ChartCanvas | ChartTransition, svgAttr: SvgAttr) {
+    export function applySvgAttr(canvas: ChartCanvas | ChartTransition, svgAttr: SvgAttr): ChartCanvas | ChartTransition {
+        let result = canvas;
         for (let attr in svgAttr) {
             const val = svgAttr[attr];
             if (val) {
-                canvas.attr(attr, val)
+                result = result.attr(attr.replace('_', '-'), val)
             }
         }
+        return result;
     }
 }

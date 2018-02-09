@@ -66,7 +66,7 @@ class ZoomLayer extends ChartPartsImpl {
         this.zoom.transform(<any>this.shape, trans)
     }
 }
-export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>[]>{
+export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>>{
     protected main: LineChart<Tx>;
     protected sub: LineChart<Tx>;
     private xrange: RangeSelecter;

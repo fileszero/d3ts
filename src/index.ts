@@ -12,8 +12,10 @@ export * from "./Svg";
 export * from "./LineChart";
 export * from "./ZoomableLineChart";
 
+/* basic parts */
 export * from "./Circle";
 export * from "./Path";
+export * from "./Text";
 
 export * from "./AxisDef";
 export * from "./legend";

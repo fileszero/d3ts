@@ -10,12 +10,12 @@ export interface CircleAttr extends Fill {
 export class Circle extends ChartDataPartsImpl<CircleAttr> {
     constructor() {
         super("circle");
-        this.data = <CircleAttr>{ cx: 0, cy: 0, r: 0 };
+        this.data = [<CircleAttr>{ cx: 0, cy: 0, r: 0 }];
     }
     drawSelf(canvas: ChartCanvas, animate: number): void {
         if (this.data) {
             const anime = canvas.transition().duration(animate);
-            util.applySvgAttr(anime, this.data);
+            util.applySvgAttr(anime, this.data[0]);
         }
     }
 }

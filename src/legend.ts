@@ -1,35 +1,30 @@
 import * as d3 from "d3";
 import { Selection } from "d3-selection";
 import { BaseType } from "d3";
-import { SeriesData } from ".";
+import * as d3ts from ".";
 
 
-export class Legend {
-    // http://bl.ocks.org/JessicaFreaner/8fb0ac6c12aa1dab5f70
-    // 表示エリア
-    public parentArea: Selection<BaseType, {}, HTMLElement, any>;
-    public drawArea: Selection<BaseType, {}, HTMLElement, any>;
-
+export class Legend extends d3ts.ChartDataPartsImpl<d3ts.SeriesData> {
     // legend data
-    protected Series: SeriesData[] = [];
-    constructor(parentArea: Selection<BaseType, {}, HTMLElement, any>) {
-        this.parentArea = parentArea;
-        this.drawArea = this.parentArea.append("g");
+    constructor() {
+        super("g");
+    }
+    private labels: d3ts.Text[] = [];
+
+
+    private ensureLabel() {
+        this.ensureParts(this.labels, () => new d3ts.Text(), (p, d, i) => {
+            p.loadData([d.name])
+            p.attr.class = "legend";
+            p.attr.y = i * 12;
+            p.attr.stroke = d.color;
+        });
+    }
+    loadData(data: d3ts.SeriesData[]) {
+        super.loadData(data);
+        this.ensureLabel();
     }
 
-    LoadData(src: SeriesData[]) {
-        this.Series = src;
-    }
-
-    draw(animate: number) {
-        let idx = 0;
-        for (let legend of this.Series) {
-            this.drawArea.append("text")
-                .attr("y", idx * 12)
-                .attr("class", "legend")  // style the legend
-                .style("fill", legend.color)
-                .text(legend.name);
-            idx++;
-        }
+    drawSelf(canvas: d3ts.ChartCanvas, animate: number) {
     }
 }

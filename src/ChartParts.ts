@@ -115,7 +115,7 @@ export abstract class ChartPartsImpl implements ChartParts {
 }
 
 export interface ChartDataParts<Tx> {
-    loadData(data: Tx): void;
+    loadData(data: Tx[]): void;
     clearData(): void;
     hasData: boolean;
 }
@@ -123,8 +123,8 @@ function IsChartDataPartsImpl<Tx>(part: any): part is ChartDataPartsImpl<Tx> {
     return (<ChartDataParts<Tx>>part).clearData !== undefined;
 }
 export abstract class ChartDataPartsImpl<Tx> extends ChartPartsImpl implements ChartParts, ChartDataParts<Tx> {
-    protected data: Tx | undefined;
-    loadData(data: Tx): void {
+    protected data: Tx[] | undefined;
+    loadData(data: Tx[]): void {
         this.data = data;
     }
     clearData(): void {
@@ -138,4 +138,30 @@ export abstract class ChartDataPartsImpl<Tx> extends ChartPartsImpl implements C
     get hasData(): boolean {
         return this.data !== undefined;
     }
+
+    ensureParts<PT extends ChartDataParts<any> & ChartParts>(parts: PT[], newFunc: () => PT, setup: (part: PT, data: Tx, idx: number) => void, parent?: ChartParts) {
+        if (!this.data) return;
+        parts.forEach((p) => p.clearData());
+        for (let i = 0; i < this.data.length; i++) {
+            const ts = this.data[i];
+            if (parts.length <= i) {
+                let part = newFunc();
+                parts.push(part);
+                if (parent) {
+                    parent.append(part)
+                } else {
+                    this.append(part);   // 描画設定
+                }
+            }
+            setup(parts[i], ts, i);
+        }
+        parts.forEach((p) => {
+            if (!p.hasData) p.remove();
+        });
+        if (parts.length > this.data.length) {
+            parts.splice(this.data.length - 1);
+        }
+
+    }
+
 }

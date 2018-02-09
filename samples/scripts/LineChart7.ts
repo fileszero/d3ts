@@ -22,6 +22,7 @@ namespace LineChart7 {
             y += (Math.random() - 0.5);
             rec.x = time;
             rec.y = y * scale;
+
         }
         listData.yAxis = Name;
         return listData;

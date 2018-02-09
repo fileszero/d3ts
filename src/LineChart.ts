@@ -4,7 +4,7 @@ import { Selection } from "d3-selection";
 import { Legend, Layout, LineSeriesData, PlotData, ChartDataPartsImpl, ChartPartsImpl, ChartCanvas, Path, Scale, ScaleParts, XAxisArea, XYAxis, YAxisArea } from ".";
 import { util } from "./util";
 
-class PlotArea<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>[]>  {
+class PlotArea<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>>  {
     constructor() {
         super("g");
     }
@@ -31,7 +31,7 @@ class PlotArea<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesDa
     }
 
 }
-export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>[]>{
+export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>>{
     /** xの描画範囲 */
     // public xScale: ScaleTime<number, number>;
     /** */
@@ -50,7 +50,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     private paths: Path<PlotData<Tx>>[] = [];
 
     // 凡例
-    // private Legend: Legend;
+    private Legend: Legend;
     protected colors: d3.ScaleOrdinal<string, string>;
 
     /** 軸を作成 */
@@ -78,34 +78,26 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     }
 
     private ensurePath(): void {
-        if (!this.data) return;
-        let i: number;
-        this.paths.forEach((p) => p.clearData());
-        for (i = 0; i < this.data.length; i++) {
-            const ts = this.data[i];
-            if (this.paths.length <= i) {
-                let path = new Path<PlotData<Tx>>((d) => d.x, (d) => d.y);
-                this.paths.push(path);
-                this.plotArea.append(path);   // 描画設定
-            }
-            this.paths[i].loadData(ts.data);
-            const axis = this.AxisDefs.filter((ax) => ax.name === ts.name)[0];
+        this.ensureParts(this.paths, () => new Path<PlotData<Tx>>((d) => d.x, (d) => d.y), (p, d, i) => {
+            p.loadData(d.data);
+            const axis = this.AxisDefs.filter((ax) => ax.name === d.name)[0];
 
-            this.paths[i].scale = axis;
-            this.paths[i].attr.stroke = this.colors(i.toString());
-        }
-        this.paths.forEach((p) => {
-            if (!p.hasData) p.remove();
-        });
-        if (this.paths.length > this.data.length) {
-            this.paths.splice(this.data.length - 1);
-        }
+            p.scale = axis;
+            p.attr.stroke = d.color;
+        }, this.plotArea);
     }
-    loadData(data: LineSeriesData<Tx>[], reset?: boolean | undefined) {
+    loadData(data: LineSeriesData<Tx>[]) {
         super.loadData(data);
+        for (let i = 0; i < data.length; i++) {
+            const d = data[i];
+            if (!d.color) {
+                d.color = this.colors(i.toString());
+            }
+        }
         this.plotArea.loadData(data);
         this.ensureAxis();
         this.ensurePath();
+        this.Legend.loadData(data);
     }
     //         let yaxis = this.yAxisDefs.filter((ax) => ax.name === axis_key)[0];
     //         if (!yaxis) {   //初回
@@ -151,6 +143,10 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
         this.xAxisArea.size.width = this.plotArea.size.width;
         this.xAxisArea.margin.top = this.plotArea.size.height;
         this.append(this.xAxisArea);
+
+        this.Legend = new Legend();
+        this.append(this.Legend);
+
         // // Add the X Axis Area and Axis
         // this.xAxisArea = this.canvas.append("g")
         //     .attr("class", "axis axis--x")

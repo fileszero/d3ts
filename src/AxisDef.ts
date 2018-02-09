@@ -9,7 +9,7 @@ export interface AxisAttr extends Fill {
 }
 
 export type AxisValueType = number | Date;
-export abstract class AxisArea extends ChartDataPartsImpl<AxisValueType[]> {
+export abstract class AxisArea extends ChartDataPartsImpl<AxisValueType> {
     constructor(position: Layout.Position) {
         super("g");
         this.position = position;
