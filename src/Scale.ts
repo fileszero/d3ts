@@ -3,6 +3,7 @@ import { util } from "./util";
 import d3 = require("d3");
 import { ChartParts } from ".";
 
+export type AxisScale = ScaleTime<number, number> | ScaleLinear<number, number>;
 export class Scale {
     constructor() {
     }
@@ -12,7 +13,7 @@ export class Scale {
 
     range: number[] = [];
 
-    getD3Scale(): ScaleTime<number, number> | ScaleLinear<number, number> | undefined {
+    getD3Scale(): AxisScale | undefined {
         this.updateScale();
         return this.mScale;
     }

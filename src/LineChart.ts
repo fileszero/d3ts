@@ -10,7 +10,7 @@ export interface LineChartOption {
 }
 export class PlotArea<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>>  {
     constructor() {
-        super("g");
+        super("g");  //g
     }
 
     // private paths: Path<PlotData<Tx>>[] = [];
@@ -159,7 +159,6 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
         }
 
         this.append(this.Legend);
-
     }
 
 

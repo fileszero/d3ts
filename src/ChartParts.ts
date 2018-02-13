@@ -62,6 +62,9 @@ export abstract class ChartPartsImpl implements ChartParts {
     public get shape(): ChartCanvas | undefined {
         if (this._shape) return this._shape;
         if (!this.parent) return undefined;
+        if (this._shapeTag === ".") {
+            return this.parent.shape;
+        }
         this._shape = this.parent.append(this._shapeTag).attr("id", this.id);
         return this._shape;
     }

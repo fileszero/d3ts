@@ -1,26 +1,38 @@
 import * as d3 from "d3";
 import { ScaleLinear, Line, Simulation, color, BaseType, ScaleTime, TransitionLike } from "d3";
 import { Selection } from "d3-selection";
-import { ChartDataPartsImpl, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas, LineChartOption } from "."
+import { ChartDataPartsImpl, ChartPartsImpl, XAxisArea, Layout, LineSeriesData, PlotData, LineChart, ChartCanvas, LineChartOption, AxisArea, Crosshair } from "."
 
 class RangeSelecter extends ChartPartsImpl {
-    constructor(onRangeChanged: () => void) {
+    constructor(zoomAxis: AxisArea, onRangeChanged: (newRange: number[]) => void) {
         super("g");
+        this.zoomAxis = zoomAxis;
+
         this.onRangeChanged = onRangeChanged;
         this.brush = d3.brushX();
 
     }
-    protected onRangeChanged: () => void;
+    protected onRangeChanged: (newRange: number[]) => void;
 
     private brush: d3.BrushBehavior<{}>;
+    private zoomAxis: AxisArea;
+
     protected drawSelf(canvas: ChartCanvas, animate: number): void {
         this.brush = this.brush
             .extent([[0, 0], [this.size.width, this.size.height]])
-            .on("brush end", this.onRangeChanged);
+            .on("brush end", () => { this.brushed(); });
         canvas
             .attr("class", "brush")
             .call(<any>this.brush);
     }
+    private brushed() {
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+        console.log("brushed");
+        var selected_range = this.zoomAxis.Zoom(d3.event.selection);
+        this.onRangeChanged(selected_range);
+        // this.zoom.transform(selected_range);    //selected_range
+    }
+
     move(domain: any) {
         this.brush.move(<any>this.shape, domain);
         // RangeSelecterUI.call(<any>brush.move, main.xAxisArea.scale.getD3Scale().range().map(t.invertX, t));
@@ -28,24 +40,45 @@ class RangeSelecter extends ChartPartsImpl {
 }
 
 class ZoomLayer extends ChartPartsImpl {
-    constructor(onZoomed: () => void) {
-        super("rect");
+    constructor(fixAxis: AxisArea, zoomAxis: AxisArea, onZoomed: (newdomain: {}[]) => void) {
+        //super("rect");
+        super(".");
+        this.fixAxis = fixAxis;
+        this.zoomAxis = zoomAxis;
         this.onZoomed = onZoomed;
         this.zoom = d3.zoom()
             .scaleExtent([1, Infinity])
 
     }
-    protected onZoomed: () => void;
+    protected onZoomed: (newdomain: {}[]) => void;
     private zoom: d3.ZoomBehavior<Element, {}>;
+    private fixAxis: AxisArea;
+    private zoomAxis: AxisArea
     protected drawSelf(canvas: ChartCanvas, animate: number): void {
         this.zoom.translateExtent([[0, 0], [this.size.width, this.size.height]])
             .extent([[0, 0], [this.size.width, this.size.height]])
-            .on("zoom", this.onZoomed);
+            .on("zoom." + this.id, () => { this.zoomed(); });
         canvas
             .attr("class", "zoom")
             .attr("width", this.size.width)
             .attr("height", this.size.height)
             .call(<any>this.zoom);
+    }
+    private zoomed() {
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+        console.log("zoomed");
+        var t = d3.event.transform;
+        var newData = t.rescaleX(this.fixAxis.scale.getD3Scale()).domain();
+        this.zoomAxis.clearData();
+        this.zoomAxis.loadData(newData);
+        // this.main.draw(10);
+        const newScale = this.zoomAxis.scale.getD3Scale();
+        let newdomain: {}[] = [];
+        if (newScale) {
+            newdomain = newScale.range().map(t.invertX, t)
+        }
+        this.onZoomed(newdomain);
+        // this.xrange.move(newdomain);
     }
 
     transform(range: number[]) {
@@ -61,6 +94,8 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsI
     protected sub: LineChart<Tx>;
     private xrange: RangeSelecter;
     private zoom: ZoomLayer;
+    private crosshair: Crosshair;
+
     public set option(opt: LineChartOption) {
         this.main.option = opt;
     }
@@ -76,50 +111,25 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsI
         this.main = main;
         this.append(main);
 
+        this.crosshair = new Crosshair();
+        this.crosshair.size = this.main.size;
+        this.main.plotArea.append(this.crosshair);
+
         const sub = new LineChart<Tx>(size.subMargin(subMargin), subMargin);
         this.sub = sub;
         this.append(sub);
         //return;
         /// サブチャートに範囲選択UIを追加
-        this.xrange = new RangeSelecter(() => this.brushed());
+        this.xrange = new RangeSelecter(this.main.xAxisArea, (newRange: number[]) => { this.zoom.transform(newRange); });
         this.xrange.size = this.sub.size;
         this.sub.plotArea.append(this.xrange);
 
-        this.zoom = new ZoomLayer(() => this.zoomed());
+        this.zoom = new ZoomLayer(this.sub.xAxisArea, this.main.xAxisArea, (newdomain: {}[]) => {
+            this.main.draw(10);
+            if (newdomain.length > 0) this.xrange.move(newdomain);
+        });
         this.zoom.size = this.main.size;
         this.main.plotArea.append(this.zoom);
-
-        // var zoom = d3.zoom()
-        //     .scaleExtent([1, Infinity])
-        //     .translateExtent([[0, 0], [main.size.width, main.size.height]])
-        //     .extent([[0, 0], [main.size.width, main.size.height]])
-        //     .on("zoom", zoomed);
-
-        // const ZoomUI = main.canvas.append("rect")
-        //     .attr("class", "zoom")
-        //     .attr("width", main.size.width)
-        //     .attr("height", main.size.height)
-        //     .call(<any>zoom);
-        // ;
-    }
-    brushed() {
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-        var selected_range = this.main.xAxisArea.Zoom(d3.event.selection);
-        this.zoom.transform(selected_range);    //selected_range
-    }
-    zoomed() {
-        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
-        console.log("zoomed");
-        var t = d3.event.transform;
-        var newData = t.rescaleX(this.sub.xAxisArea.scale.getD3Scale()).domain();
-        this.main.xAxisArea.clearData();
-        this.main.xAxisArea.loadData(newData);
-        this.main.draw(10);
-        const scale = this.main.xAxisArea.scale.getD3Scale();
-        if (scale) {
-            const newdomain = scale.range().map(t.invertX, t)
-            this.xrange.move(newdomain);
-        }
     }
 
     public loadData(data: LineSeriesData<Tx>[]) {

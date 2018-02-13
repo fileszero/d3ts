@@ -19,3 +19,4 @@ export * from "./Text";
 
 export * from "./AxisDef";
 export * from "./legend";
+export * from "./LineChartMouseOver";
