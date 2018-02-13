@@ -64,12 +64,12 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     private ensureAxis(): void {
         if (!this.data) return;
         for (const ts of this.data) {    //軸毎の処理
-            let axis = this.AxisDefs.filter((ax) => ax.name === ts.name)[0];
+            let axis = this.AxisDefs.filter((ax) => ax.name === ts.yAxis)[0];
             if (!axis) {    // new !
                 const yaxis = new YAxisArea();
                 yaxis.size.height = this.plotArea.size.height;
                 this.append(yaxis);
-                axis = new XYAxis(ts.name, this.xAxisArea, yaxis);
+                axis = new XYAxis(ts.yAxis, this.xAxisArea, yaxis);
                 if (this.AxisDefs.length == 0) {
                     yaxis.position = Layout.Position.Left;
                 } else {
@@ -85,14 +85,16 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     }
 
     private ensurePath(): void {
-        this.ensureParts(this.paths, () => new Path<PlotData<Tx>>((d) => d.x, (d) => d.y), (p, d, i) => {
-            p.loadData(d.data);
-            const axis = this.AxisDefs.filter((ax) => ax.name === d.name)[0];
+        this.ensureParts(this.paths,
+            () => new Path<PlotData<Tx>>((d) => d.x, (d) => d.y === 0 ? undefined : d.y),
+            (p, d, i) => {
+                p.loadData(d.data);
+                const axis = this.AxisDefs.filter((ax) => ax.name === d.yAxis)[0];
 
-            p.scale = axis;
-            p.attr.stroke = d.color;
-            p.for = d.id;
-        }, this.plotArea);
+                p.scale = axis;
+                p.attr.stroke = d.color;
+                p.for = d.id;
+            }, this.plotArea);
     }
     loadData(data: LineSeriesData<Tx>[]) {
         super.loadData(data);

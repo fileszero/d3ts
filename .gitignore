@@ -64,3 +64,4 @@ typings/
 package-lock.json
 /samples/data/*
 /samples/dist/*
+client/dist
