@@ -68,6 +68,7 @@ export class Path<Tx> extends ChartDataPartsImpl<Tx> {
         }
         util.applySvgAttr(anime, this.attr);
         anime.style("opacity", this.show ? 1 : 0);
+        anime.attr("for", this.for || "");
         anime.attr("d", generator(this.data) || "");
     }
 

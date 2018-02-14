@@ -55,7 +55,7 @@ class ZoomLayer extends ChartPartsImpl {
     private fixAxis: AxisArea;
     private zoomAxis: AxisArea
     protected drawSelf(canvas: ChartCanvas, animate: number): void {
-        this.zoom.translateExtent([[0, 0], [this.size.width, this.size.height]])
+        this.zoom = this.zoom.translateExtent([[0, 0], [this.size.width, this.size.height]])
             .extent([[0, 0], [this.size.width, this.size.height]])
             .on("zoom." + this.id, () => { this.zoomed(); });
         canvas

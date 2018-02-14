@@ -70,7 +70,7 @@ namespace LineChart7 {
             listData.push(createData("Rec" + i, df.addDays(new Date(), 1), 2));
         }
         chart.loadData(listData);
-        chart.option.LegendPos = undefined;
+        chart.option.LegendPos = Layout.Position.Right;
         chart.draw();
     }, 2000);
 
