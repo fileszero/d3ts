@@ -42,7 +42,9 @@ export class File {
                         lines.splice(0, option.header - 1);
                         csv = lines.join('\n');
                     }
+                    //console.log(csv);
                     var data = d3.csvParse(csv);
+                    //console.log(data);
                     resolve(data);
                 });
             } catch (ex) {

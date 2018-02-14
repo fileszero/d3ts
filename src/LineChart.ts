@@ -86,7 +86,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
 
     private ensurePath(): void {
         this.ensureParts(this.paths,
-            () => new Path<PlotData<Tx>>((d) => d.x, (d) => d.y === 0 ? undefined : d.y),
+            () => new Path<PlotData<Tx>>((d) => d.x, (d) => d.y),
             (p, d, i) => {
                 p.loadData(d.data);
                 const axis = this.AxisDefs.filter((ax) => ax.name === d.yAxis)[0];

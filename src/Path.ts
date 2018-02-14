@@ -25,18 +25,22 @@ export class Path<Tx> extends ChartDataPartsImpl<Tx> {
         return 0;
     }
 
-    private xFunc(d: Tx, i: number, arr: Tx[]): number {
-        if (!this.xf) return 0;
-        let val = this.xf(d, i, arr) || 0;
+    private xFunc(d: Tx, i: number, arr: Tx[]): number | undefined {
+        if (!this.xf) return undefined;
+        let val = this.xf(d, i, arr);
+        if (val === undefined) return undefined;
+        if (val === NaN) return undefined;
         if (this.scale && this.scale.xscale) {
             val = this.scale.xscale.scale(val);
         }
         if (util.isNumber(val)) return val;
         return 0;
     }
-    private yFunc(d: Tx, i: number, arr: Tx[]): number {
-        if (!this.yf) return 0;
-        let val = this.yf(d, i, arr) || 0;
+    private yFunc(d: Tx, i: number, arr: Tx[]): number | undefined {
+        if (!this.yf) return undefined;
+        let val = this.yf(d, i, arr);
+        if (val === undefined) return undefined;
+        if (val === NaN) return undefined;
         if (this.scale && this.scale.yscale) {
             val = this.scale.yscale.scale(val);
         }
@@ -51,10 +55,17 @@ export class Path<Tx> extends ChartDataPartsImpl<Tx> {
         if (!this.yf) return;
         if (!this.data) return;
 
-        const xf = (d: Tx, i: number, a: Tx[]): number => { return this.xFunc(d, i, a); };  //this.xf ? this.xf : this.defaultXYFunction;
-        const yf = (d: Tx, i: number, a: Tx[]): number => { return this.yFunc(d, i, a); };   //this.yf ? this.yf : this.defaultXYFunction;;
+        const xf = (d: Tx, i: number, a: Tx[]): number => { return this.xFunc(d, i, a) || 0; };  //this.xf ? this.xf : this.defaultXYFunction;
+        const yf = (d: Tx, i: number, a: Tx[]): number => { return this.yFunc(d, i, a) || 0; };   //this.yf ? this.yf : this.defaultXYFunction;;
         const generator = d3.line<Tx>()
-            .defined((d, i, ar) => { return yf(d, i, ar) !== undefined })
+            .defined((d, i, ar) => {
+                const val = this.yFunc(d, i, ar);    //yf(d, i, ar);
+                let result = true;
+                if (val === undefined) result = false;
+                else if (isNaN(val)) result = false;
+                // console.log(val + "=>" + result);
+                return result;
+            })
             .x(xf)
             .y(yf)
             ;
