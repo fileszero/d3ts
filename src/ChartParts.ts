@@ -85,10 +85,10 @@ export abstract class ChartPartsImpl implements ChartParts {
         if (this.shape) {
             const anime = this.shape.transition().duration(animate);
             if (!this.visible) {
-                anime.style("opacity", 0)
+                anime.style("visible", false)
                 return;
             }
-            anime.style("opacity", 1)
+            anime.style("visible", true)
             this.drawSelf(this.shape, animate);
             if ((this.margin.left != 0 || this.margin.top != 0)) {
                 this.shape.attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
