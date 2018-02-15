@@ -93,6 +93,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
 
                 p.scale = axis;
                 p.attr.stroke = d.color;
+                p.attr.stroke_width = d.width;
                 p.for = d.id;
             }, this.plotArea);
     }
@@ -155,7 +156,15 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
         this.Legend.onMouseout = (text: d3ts.Text) => {
             const path = this.findPathFor(text.for);
             if (path) {
-                path.attr.stroke_width = 1;
+                let src: LineSeriesData<Tx> | undefined;
+                if (this.data) {
+                    src = this.data.find((d) => d.id == text.for);
+                }
+                if (src) {
+                    path.attr.stroke_width = src.width;
+                } else {
+                    path.attr.stroke_width = 1;
+                }
                 path.draw();
             }
         }
