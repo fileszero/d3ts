@@ -1,4 +1,5 @@
 import { util } from "./util";
+import { PathAttr } from ".";
 
 export class PlotData<Tx extends number | Date>{
     public x: Tx | undefined;
@@ -8,7 +9,8 @@ export class PlotData<Tx extends number | Date>{
 export interface SeriesData {
     name: string;
     id: string;
-    color: string;
+    //color: string;
+    pathAttr: PathAttr;
 }
 
 export class LineSeriesData<Tx extends number | Date> implements SeriesData {
@@ -18,8 +20,9 @@ export class LineSeriesData<Tx extends number | Date> implements SeriesData {
     public name: string = "default";
     public id: string = "";
     public yAxis: string = "default";
-    public color: string = "";
-    public width: number = 1;
+    public pathAttr: PathAttr = <PathAttr>{ stroke_width: 1 };
+    // public color: string = "";
+    // public width: number = 1;
     public data: PlotData<Tx>[] = [];
     get xArray(): (Tx | undefined)[] {
         return this.data.map((d) => d.x);

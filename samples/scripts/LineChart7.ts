@@ -32,7 +32,7 @@ namespace LineChart7 {
         const listData: LineSeriesData<Date>[] = [];
         for (let i = 0; i < 3; i++) {
             let data = createData("Rec" + i, new Date());
-            data.width = i + 1;
+            data.pathAttr.stroke_width = i + 1;
             listData.push(data);
         }
         // http://bl.ocks.org/d3noob/e34791a32a54e015f57d

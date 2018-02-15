@@ -92,8 +92,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
                 const axis = this.AxisDefs.filter((ax) => ax.name === d.yAxis)[0];
 
                 p.scale = axis;
-                p.attr.stroke = d.color;
-                p.attr.stroke_width = d.width;
+                p.attr = d.pathAttr;
                 p.for = d.id;
             }, this.plotArea);
     }
@@ -101,8 +100,8 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
         super.loadData(data);
         for (let i = 0; i < data.length; i++) {
             const d = data[i];
-            if (!d.color) {
-                d.color = this.colors(i.toString());
+            if (!d.pathAttr.stroke) {
+                d.pathAttr.stroke = this.colors(i.toString());
             }
         }
         this.plotArea.loadData(data);
@@ -148,6 +147,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
         this.Legend.onMouseover = (text: d3ts.Text) => {
             const path = this.findPathFor(text.for);
             if (path) {
+                path.attr = (JSON.parse(JSON.stringify(path.attr)));
                 path.attr.stroke_width = 5;
                 path.draw();
             }
@@ -161,7 +161,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
                     src = this.data.find((d) => d.id == text.for);
                 }
                 if (src) {
-                    path.attr.stroke_width = src.width;
+                    path.attr = src.pathAttr;
                 } else {
                     path.attr.stroke_width = 1;
                 }

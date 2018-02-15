@@ -29,7 +29,8 @@ namespace LineChart8 {
                 //listData.yAxis = "default";
                 if (field == "price") {
                     listData.yAxis = "price";
-                    listData.width = 3;
+                    //listData.pathAttr.stroke_width = 3;
+                    listData.pathAttr.class = "price";
                 } else {
                     listData.yAxis = "calc";
                 }

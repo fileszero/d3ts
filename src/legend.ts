@@ -20,7 +20,7 @@ export class Legend extends d3ts.ChartDataPartsImpl<d3ts.SeriesData> {
             p.loadData([d.name])
             p.attr.class = "legend";
             p.attr.y = i * 12;
-            p.attr.stroke = d.color;
+            p.attr.stroke = d.pathAttr.stroke;
             p.for = d.id;
             p.event.onclick = (d, i, g) => {
                 this.textEvent(g[i], this.onClick);
