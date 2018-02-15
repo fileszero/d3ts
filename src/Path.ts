@@ -77,7 +77,7 @@ export class Path<Tx> extends ChartDataPartsImpl<Tx> {
         } else {
             anime = canvas;
         }
-        util.applySvgAttr(anime, this.attr);
+        util.applySvgStyle(anime, this.attr);
         anime.attr("for", this.for || "");
         anime.attr("d", generator(this.data) || "");
     }

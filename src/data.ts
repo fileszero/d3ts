@@ -20,7 +20,7 @@ export class LineSeriesData<Tx extends number | Date> implements SeriesData {
     public name: string = "default";
     public id: string = "";
     public yAxis: string = "default";
-    public pathAttr: PathAttr = <PathAttr>{ stroke_width: 1 };
+    public pathAttr: PathAttr = <PathAttr>{};
     // public color: string = "";
     // public width: number = 1;
     public data: PlotData<Tx>[] = [];

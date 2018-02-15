@@ -21,6 +21,21 @@ export namespace util {
         }
         return result;
     }
+    export function applySvgStyle(canvas: ChartCanvas | ChartTransition, svgAttr: SvgAttr): ChartCanvas | ChartTransition {
+        let result = canvas;
+        result.attr("style", null);
+        for (let attr in svgAttr) {
+            const val = svgAttr[attr];
+            if (val) {
+                if (attr.match(/(class)/i)) {
+                    result = result.attr(attr.replace('_', '-'), val)
+                } else {
+                    result = result.style(attr.replace('_', '-'), val)
+                }
+            }
+        }
+        return result;
+    }
     export function applySvgEvent(canvas: ChartCanvas | ChartTransition, svgEvent: SvgEvent): ChartCanvas | ChartTransition {
         let result = canvas;
         for (let event in svgEvent) {
