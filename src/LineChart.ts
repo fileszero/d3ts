@@ -68,6 +68,7 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
             if (!axis) {    // new !
                 const yaxis = new YAxisArea();
                 yaxis.size.height = this.plotArea.size.height;
+                yaxis.attr.class = ts.yAxis;
                 this.append(yaxis);
                 axis = new XYAxis(ts.yAxis, this.xAxisArea, yaxis);
                 if (this.AxisDefs.length == 0) {
@@ -80,7 +81,9 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
                 yaxis.attr.stroke = this.colors(this.AxisDefs.length.toString());
             }
             axis.xAxis.loadData(<(number | Date)[]>ts.xArray);
+            axis.xAxis.tickSizeInner = this.plotArea.size.height;
             axis.yAxis.loadData(<(number | Date)[]>ts.yArray);
+            axis.yAxis.tickSizeInner = this.plotArea.size.width;
         }
     }
 

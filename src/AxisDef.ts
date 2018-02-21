@@ -40,6 +40,7 @@ export abstract class AxisArea extends ChartDataPartsImpl<AxisValueType> {
     }
     public position: Layout.Position;  //default
     public positionOffset: number = 0;
+    public tickSizeInner: number = 0;
     public attr: AxisAttr = <AxisAttr>{};
 
     drawSelf(canvas: ChartCanvas, animate: number): void {
@@ -50,6 +51,7 @@ export abstract class AxisArea extends ChartDataPartsImpl<AxisValueType> {
 
         let axisFunc = d3.axisLeft;   // default left
         let x_offset = 0, y_offset = 0;
+
         if (this.position === Layout.Position.Left) {
             axisFunc = d3.axisLeft;
             x_offset = this.positionOffset;
@@ -64,7 +66,10 @@ export abstract class AxisArea extends ChartDataPartsImpl<AxisValueType> {
             y_offset = this.positionOffset;
         }
 
-        const axis = axisFunc(axis_scale);
+        let axis = axisFunc(axis_scale);
+        if (this.tickSizeInner != 0) {
+            axis = axis.tickSizeInner(-this.tickSizeInner);
+        }
         if (x_offset != 0 || y_offset != 0) {
             canvas.attr("transform", "translate(" + x_offset + ", " + y_offset + " )");
         }

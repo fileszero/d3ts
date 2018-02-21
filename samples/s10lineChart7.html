@@ -10,10 +10,10 @@
             font: 12px Arial;
         }
 
-        path {
-            /* stroke: steelblue;
-            stroke-width: 2; */
-            fill: none;
+        path.price {
+            stroke: blue;
+            stroke-width: 4;
+            opacity: 0.2;
         }
 
         .axis path,
@@ -23,6 +23,19 @@
             stroke-width: 1;
             shape-rendering: crispEdges;
         }
+
+        .tick line {
+            opacity: 0.1;
+            stroke: grey;
+            stroke-width: 1;
+        }
+
+        .price .tick line {
+            opacity: 0.3;
+            stroke: grey;
+            stroke-width: 1;
+        }
+
 
         .area {
             fill: steelblue;
