@@ -7,6 +7,7 @@ import * as d3ts from ".";
 
 export interface LineChartOption {
     LegendPos: Layout.Position;
+    showGrid: boolean | undefined;
 }
 export class PlotArea<Tx extends number | Date> extends ChartDataPartsImpl<LineSeriesData<Tx>>  {
     constructor() {
@@ -81,9 +82,12 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
                 yaxis.attr.stroke = this.colors(this.AxisDefs.length.toString());
             }
             axis.xAxis.loadData(<(number | Date)[]>ts.xArray);
-            axis.xAxis.tickSizeInner = this.plotArea.size.height;
             axis.yAxis.loadData(<(number | Date)[]>ts.yArray);
-            axis.yAxis.tickSizeInner = this.plotArea.size.width;
+            // show grid
+            if (this.option.showGrid) {
+                axis.xAxis.tickSizeInner = this.plotArea.size.height;
+                axis.yAxis.tickSizeInner = this.plotArea.size.width;
+            }
         }
     }
 

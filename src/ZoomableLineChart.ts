@@ -109,6 +109,7 @@ export class ZoomableLineChart<Tx extends number | Date> extends ChartDataPartsI
         const subMargin = new Layout.Margin({ top: size.height - 100, right: chartMargin.right, left: chartMargin.left, bottom: chartMargin.bottom });
         const main = new LineChart<Tx>(size.subMargin(mainMargin), mainMargin);
         this.main = main;
+        this.main.option.showGrid = true;
         this.append(main);
 
         this.crosshair = new Crosshair();
