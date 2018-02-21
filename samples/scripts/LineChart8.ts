@@ -16,6 +16,7 @@ namespace LineChart8 {
     console.log(urlParams);
 
     const datePerser = d3.timeParse(urlParams.df || "%b-%Y");
+    const colors: d3.ScaleOrdinal<string, string> = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
     async function readData(): Promise<LineSeriesData<Date>[]> {
         const data: LineSeriesData<Date>[] = [];
@@ -34,6 +35,7 @@ namespace LineChart8 {
                 } else {
                     listData.yAxis = "calc";
                 }
+                listData.pathAttr.stroke = colors(data.length.toString());
                 data.push(listData);
             }
         }

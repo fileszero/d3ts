@@ -9,6 +9,7 @@ import { Layout, LineSeriesData, PlotData, ZoomableLineChart, Svg } from "../../
 namespace LineChart7 {
     d3.select("body").append("p")
         .text("Zoom and Brush in d3 https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172");
+    const colors: d3.ScaleOrdinal<string, string> = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
     function createData(Name: string, date: Date, scale: number = 1): LineSeriesData<Date> {
         // 時系列データ作成
@@ -27,6 +28,11 @@ namespace LineChart7 {
         listData.yAxis = Name;
         return listData;
     }
+    function setColor(data: LineSeriesData<Date>[]) {
+        for (let i = 0; i < data.length; i++) {
+            data[i].pathAttr.stroke = colors(i.toString());
+        }
+    }
 
     function DrawChart(): ZoomableLineChart<Date> {
         const listData: LineSeriesData<Date>[] = [];
@@ -35,6 +41,7 @@ namespace LineChart7 {
             data.pathAttr.stroke_width = i + 1;
             listData.push(data);
         }
+        setColor(listData);
         // http://bl.ocks.org/d3noob/e34791a32a54e015f57d
         // https://bl.ocks.org/d3noob/814a2bcb3e7d8d8db74f36f77c8e6b7f
         // https://bl.ocks.org/d3noob/755a069aafbe66f3fd8497b9498df643  <= V4!
@@ -69,6 +76,7 @@ namespace LineChart7 {
             listData.push(createData("Rec" + i, new Date(), 10));
             listData.push(createData("Rec" + i, df.addDays(new Date(), 1), 2));
         }
+        setColor(listData);
         chart.loadData(listData);
         chart.option.LegendPos = Layout.Position.Right;
         chart.draw();
@@ -79,6 +87,7 @@ namespace LineChart7 {
         for (let i = 0; i < 5; i++) {
             listData.push(createData("Rec" + i, new Date(), 3));
         }
+        setColor(listData);
         chart.loadData(listData);
         chart.option.LegendPos = Layout.Position.Bottom;
         chart.draw();

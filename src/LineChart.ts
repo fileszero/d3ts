@@ -105,12 +105,6 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     }
     loadData(data: LineSeriesData<Tx>[]) {
         super.loadData(data);
-        for (let i = 0; i < data.length; i++) {
-            const d = data[i];
-            if (!d.pathAttr.stroke) {
-                d.pathAttr.stroke = this.colors(i.toString());
-            }
-        }
         this.plotArea.loadData(data);
         this.ensureAxis();
         this.ensurePath();
