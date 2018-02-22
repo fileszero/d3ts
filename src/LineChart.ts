@@ -59,7 +59,6 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     }
     // 凡例
     private Legend: Legend;
-    protected colors: d3.ScaleOrdinal<string, string>;
 
     /** 軸を作成 */
     private ensureAxis(): void {
@@ -79,7 +78,6 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
                     yaxis.margin.left = this.plotArea.size.width + ((this.AxisDefs.length - 1) * 40);
                 }
                 this.AxisDefs.push(axis);
-                yaxis.attr.stroke = this.colors(this.AxisDefs.length.toString());
             }
             axis.xAxis.loadData(<(number | Date)[]>ts.xArray);
             axis.yAxis.loadData(<(number | Date)[]>ts.yArray);
@@ -120,7 +118,6 @@ export class LineChart<Tx extends number | Date> extends ChartDataPartsImpl<Line
     public option: LineChartOption = <LineChartOption>{};
     constructor(size: Layout.Size, chartMargin: Layout.Margin) {
         super("g");
-        this.colors = d3.scaleOrdinal(d3.schemeCategory20);  // 20色を指定
 
         this.size = size;
         this.margin = new Layout.Margin(chartMargin);
